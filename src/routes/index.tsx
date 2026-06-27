@@ -39,10 +39,10 @@ function Countdown() {
 }
 
 const categories = [
-  { name: "Club Jerseys", img: "https://source.unsplash.com/600x400/?football+club+jersey", to: "Club" },
-  { name: "National Team", img: "https://source.unsplash.com/600x400/?national+football+team", to: "National" },
-  { name: "Retro/Vintage", img: "https://source.unsplash.com/600x400/?retro+football+jersey", to: "Retro" },
-  { name: "Training Kits", img: "https://source.unsplash.com/600x400/?football+training+kit", to: "Training" },
+  { name: "Club Jerseys", img: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=400&fit=crop", to: "Club" },
+  { name: "National Team", img: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&h=400&fit=crop", to: "National" },
+  { name: "Retro/Vintage", img: "https://images.unsplash.com/photo-1547347298-4074fc3086f0?w=600&h=400&fit=crop", to: "Retro" },
+  { name: "Training Kits", img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=400&fit=crop", to: "Training" },
 ];
 
 const testimonials = [
@@ -58,7 +58,7 @@ function Home() {
       {/* HERO */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10">
-          <img src="https://source.unsplash.com/1920x1080/?football+stadium+night" alt="" className="h-full w-full object-cover opacity-30" />
+          <img src="https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1920&h=1080&fit=crop" alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} className="h-full w-full object-cover opacity-30" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
         </div>
         <div className="container mx-auto px-4 py-20 md:py-32 grid md:grid-cols-2 gap-10 items-center">
@@ -91,7 +91,7 @@ function Home() {
           </div>
           <div className="relative hidden md:block">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-            <img src="https://source.unsplash.com/600x800/?football+jersey+green" alt="Jersey" className="relative rounded-2xl object-cover w-full h-[520px] border border-border" />
+            <img src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&h=800&fit=crop" alt="Jersey" onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=800&fit=crop"; }} className="relative rounded-2xl object-cover w-full h-[520px] border border-border" />
           </div>
         </div>
       </section>
@@ -107,7 +107,7 @@ function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {categories.map((c) => (
             <Link key={c.name} to="/shop" className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-border hover:border-primary transition">
-              <img src={c.img} alt={c.name} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
+              <img src={c.img} alt={c.name} onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=400&fit=crop"; }} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
               <div className="absolute bottom-0 p-4">
                 <h3 className="font-display text-2xl text-white">{c.name}</h3>

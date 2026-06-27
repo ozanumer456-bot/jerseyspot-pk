@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { SAMPLE_PRODUCTS, formatPKR } from "@/lib/products";
 import { useCart } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
+import { onImgError } from "@/lib/img-fallback";
 
 export const Route = createFileRoute("/product/$id")({
   component: ProductPage,
@@ -48,12 +49,12 @@ function ProductPage() {
         <div className="grid md:grid-cols-2 gap-10">
           <div>
             <div className="aspect-[4/5] rounded-xl overflow-hidden bg-secondary border border-border">
-              <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+              <img src={product.image} alt={product.name} onError={onImgError} className="h-full w-full object-cover" />
             </div>
             <div className="grid grid-cols-4 gap-2 mt-3">
               {[product.image, product.image, product.image, product.image].map((src, i) => (
                 <div key={i} className="aspect-square rounded-md overflow-hidden border border-border bg-secondary">
-                  <img src={src} alt="" className="h-full w-full object-cover" />
+                  <img src={src} alt="" onError={onImgError} className="h-full w-full object-cover" />
                 </div>
               ))}
             </div>

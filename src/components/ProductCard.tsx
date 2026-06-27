@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { formatPKR, type Product } from "@/lib/products";
 import { useCart } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
+import { onImgError } from "@/lib/img-fallback";
 
 export function ProductCard({ p }: { p: Product }) {
   const add = useCart((s) => s.add);
@@ -18,7 +19,7 @@ export function ProductCard({ p }: { p: Product }) {
     <Card className="group relative overflow-hidden bg-card border-border hover:border-primary/60 transition-all hover:-translate-y-1 hover:glow-green p-0">
       <Link to="/product/$id" params={{ id: p.id }} className="block">
         <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
-          <img src={p.image} alt={p.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+          <img src={p.image} alt={p.name} loading="lazy" onError={onImgError} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
           <div className="absolute top-3 left-3 flex flex-col gap-1">
             {p.isNew && <Badge className="bg-primary text-primary-foreground">NEW</Badge>}
             {onSale && <Badge className="bg-destructive text-destructive-foreground">SALE</Badge>}
