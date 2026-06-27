@@ -173,7 +173,7 @@ function Products() {
             <tbody>
               {products.map((p) => (
                 <tr key={p.id} className="border-t border-border">
-                  <td className="p-3"><img src={p.image} alt="" className="h-12 w-10 rounded object-cover" /></td>
+                  <td className="p-3"><img src={p.image} alt="" onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=500&fit=crop"; }} className="h-12 w-10 rounded object-cover" /></td>
                   <td className="p-3 font-semibold">{p.name}</td>
                   <td className="p-3 text-muted-foreground">{p.team}</td>
                   <td className="p-3 text-primary">{formatPKR(p.salePrice ?? p.price)}</td>

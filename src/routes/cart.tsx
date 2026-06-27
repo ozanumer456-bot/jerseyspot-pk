@@ -32,7 +32,7 @@ function CartPage() {
             <div className="space-y-3">
               {items.map((item) => (
                 <Card key={item.id} className="p-4 grid grid-cols-[80px_1fr_auto] gap-4 items-center bg-card border-border">
-                  <img src={item.image} alt={item.name} className="h-24 w-20 rounded object-cover" />
+                  <img src={item.image} alt={item.name} onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=500&fit=crop"; }} className="h-24 w-20 rounded object-cover" />
                   <div className="min-w-0">
                     <div className="font-display text-lg truncate">{item.name}</div>
                     <div className="text-xs text-muted-foreground">Size: {item.size}</div>

@@ -86,7 +86,7 @@ function Checkout() {
             <div className="space-y-2 max-h-60 overflow-auto pr-2">
               {items.map((i) => (
                 <div key={i.id} className="flex gap-3 text-sm">
-                  <img src={i.image} alt="" className="h-12 w-10 rounded object-cover" />
+                  <img src={i.image} alt="" onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=500&fit=crop"; }} className="h-12 w-10 rounded object-cover" />
                   <div className="flex-1 min-w-0">
                     <div className="truncate font-medium">{i.name}</div>
                     <div className="text-xs text-muted-foreground">{i.size} × {i.quantity}</div>
