@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/store/cart";
 import { formatPKR } from "@/lib/products";
+import { useSettings } from "@/lib/settings";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({ meta: [{ title: "Your Cart — JerseyPK" }] }),
@@ -14,8 +15,9 @@ export const Route = createFileRoute("/cart")({
 
 function CartPage() {
   const { items, updateQty, remove, subtotal } = useCart();
+  const { settings } = useSettings();
   const sub = subtotal();
-  const shipping = sub >= 2000 || sub === 0 ? 0 : 250;
+  const shipping = sub === 0 || sub >= settings.free_shipping_above ? 0 : settings.shipping_cost;
   const total = sub + shipping;
 
   return (

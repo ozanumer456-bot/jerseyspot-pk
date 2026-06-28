@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut, Plus, Pencil, Trash2 } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,42 +10,46 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAdmin, type Order } from "@/store/admin";
-import { formatPKR, type Product } from "@/lib/products";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth, signOut } from "@/lib/auth";
+import { formatPKR, type Product, mapProduct, type DbProduct } from "@/lib/products";
+import { useSettings, type Settings as Stg } from "@/lib/settings";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — JerseyPK" }] }),
   component: Admin,
 });
 
-function Login() {
-  const login = useAdmin((s) => s.login);
-  const [pw, setPw] = useState("");
-  return (
-    <div className="min-h-screen grid place-items-center bg-background p-4">
-      <Card className="p-8 w-full max-w-md bg-card border-border">
-        <div className="flex items-center gap-2 mb-6 justify-center">
-          <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary text-primary-foreground font-display text-xl">J</div>
-          <span className="font-display text-3xl">Jersey<span className="text-primary">PK</span> Admin</span>
-        </div>
-        <form onSubmit={(e)=>{e.preventDefault(); if(!login(pw)) toast.error("Wrong password");}} className="space-y-4">
-          <div><Label>Password</Label><Input type="password" value={pw} onChange={(e)=>setPw(e.target.value)} placeholder="Enter admin password" /></div>
-          <Button type="submit" className="w-full bg-primary text-primary-foreground">Sign In</Button>
-          <p className="text-xs text-center text-muted-foreground">Default: <code>admin123</code></p>
-        </form>
-      </Card>
-    </div>
-  );
-}
+type Order = {
+  id: string;
+  customer_name: string;
+  phone: string;
+  city: string;
+  address: string;
+  postal_code: string | null;
+  payment_method: string;
+  items: { product_id: string; name: string; size: string; quantity: number; price: number }[];
+  subtotal: number;
+  shipping: number;
+  total: number;
+  status: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+  created_at: string;
+};
 
 type Tab = "dashboard" | "products" | "orders" | "customers" | "settings";
 
 function Admin() {
-  const authed = useAdmin((s) => s.authed);
-  const logout = useAdmin((s) => s.logout);
+  const navigate = useNavigate();
+  const { user, isAdmin, loading } = useAuth();
   const [tab, setTab] = useState<Tab>("dashboard");
 
-  if (!authed) return <Login />;
+  useEffect(() => {
+    if (!loading && (!user || !isAdmin)) navigate({ to: "/admin/login" });
+  }, [loading, user, isAdmin, navigate]);
+
+  if (loading || !user || !isAdmin) {
+    return <div className="min-h-screen grid place-items-center bg-background"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  }
 
   const tabs: { id: Tab; label: string; icon: any }[] = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -53,6 +58,11 @@ function Admin() {
     { id: "customers", label: "Customers", icon: Users },
     { id: "settings", label: "Settings", icon: Settings },
   ];
+
+  const logout = async () => {
+    await signOut();
+    navigate({ to: "/admin/login" });
+  };
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -68,6 +78,7 @@ function Admin() {
             </button>
           ))}
         </nav>
+        <div className="text-xs text-muted-foreground mb-2 px-2 truncate">{user.email}</div>
         <Button variant="ghost" onClick={logout} className="justify-start"><LogOut className="h-4 w-4 mr-2" />Logout</Button>
       </aside>
 
@@ -89,22 +100,57 @@ function Admin() {
   );
 }
 
+function useOrders() {
+  return useQuery({
+    queryKey: ["orders"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("orders" as any).select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data as unknown as Order[]) ?? [];
+    },
+  });
+}
+
+function useAdminProducts() {
+  return useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products" as any).select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return ((data as unknown as DbProduct[]) ?? []).map(mapProduct);
+    },
+  });
+}
+
+function useCustomers() {
+  return useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("customers" as any).select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data as unknown as { id: string; name: string; phone: string; city: string; total_orders: number; total_spent: number }[]) ?? [];
+    },
+  });
+}
+
 function Dashboard() {
-  const orders = useAdmin((s) => s.orders);
-  const products = useAdmin((s) => s.products);
-  const today = new Date().setHours(0,0,0,0);
-  const todayOrders = orders.filter((o) => o.createdAt >= today).length;
-  const revenue = orders.reduce((s,o)=>s+o.total, 0);
+  const { data: orders = [] } = useOrders();
+  const { data: products = [] } = useAdminProducts();
+  const { data: customers = [] } = useCustomers();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayOrders = orders.filter((o) => new Date(o.created_at) >= today).length;
+  const revenue = orders.filter((o) => o.status !== "cancelled").reduce((s,o)=>s+o.total, 0);
   const stats = [
-    { l: "Total Sales", v: orders.length },
-    { l: "Orders Today", v: todayOrders },
     { l: "Revenue", v: formatPKR(revenue) },
+    { l: "Total Orders", v: orders.length },
+    { l: "Orders Today", v: todayOrders },
     { l: "Total Products", v: products.length },
+    { l: "Customers", v: customers.length },
   ];
   return (
     <div>
       <h1 className="font-display text-3xl mb-6">Dashboard</h1>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map((s) => (
           <Card key={s.l} className="p-5 bg-card border-border">
             <div className="text-xs text-muted-foreground uppercase tracking-wide">{s.l}</div>
@@ -118,8 +164,11 @@ function Dashboard() {
           <div className="space-y-2">
             {orders.slice(0,5).map((o)=>(
               <div key={o.id} className="flex items-center justify-between p-3 rounded border border-border">
-                <div><div className="font-semibold">{o.id}</div><div className="text-xs text-muted-foreground">{o.customer.name} · {o.customer.city}</div></div>
-                <div className="text-primary font-semibold">{formatPKR(o.total)}</div>
+                <div><div className="font-semibold font-mono text-xs">JPK-{o.id.slice(0,8).toUpperCase()}</div><div className="text-xs text-muted-foreground">{o.customer_name} · {o.city}</div></div>
+                <div className="flex items-center gap-3">
+                  <Badge className="bg-secondary text-foreground capitalize">{o.status}</Badge>
+                  <div className="text-primary font-semibold">{formatPKR(o.total)}</div>
+                </div>
               </div>
             ))}
           </div>
@@ -129,79 +178,164 @@ function Dashboard() {
   );
 }
 
-function ProductForm({ initial, onSave, onClose }: { initial?: Product; onSave: (p: Product) => void; onClose: () => void }) {
-  const [p, setP] = useState<Product>(initial ?? { id: "p"+Date.now(), name: "", team: "", category: "Club", type: "Home", price: 0, image: "", sizes: ["S","M","L","XL"], stock: 0, description: "", rating: 4 });
+type ProductFormState = {
+  id?: string;
+  name: string; team: string; category: string; type: string;
+  price: number; sale_price: number | null;
+  sizes: string[]; image_url: string; stock: number;
+  is_new: boolean; is_sale: boolean; description: string; rating: number;
+};
+
+function ProductForm({ initial, onClose }: { initial?: Product; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const [p, setP] = useState<ProductFormState>(initial ? {
+    id: initial.id, name: initial.name, team: initial.team, category: initial.category, type: initial.type,
+    price: initial.price, sale_price: initial.salePrice ?? null,
+    sizes: initial.sizes, image_url: initial.image, stock: initial.stock,
+    is_new: !!initial.isNew, is_sale: !!initial.isSale, description: initial.description, rating: initial.rating,
+  } : {
+    name: "", team: "", category: "Club", type: "Home",
+    price: 0, sale_price: null, sizes: ["S","M","L","XL"], image_url: "", stock: 0,
+    is_new: false, is_sale: false, description: "", rating: 4,
+  });
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const payload = {
+        name: p.name, team: p.team, category: p.category, type: p.type,
+        price: p.price, sale_price: p.sale_price, sizes: p.sizes,
+        image_url: p.image_url, stock: p.stock, is_new: p.is_new, is_sale: p.is_sale,
+        description: p.description, rating: p.rating,
+      };
+      if (p.id) {
+        const { error } = await supabase.from("products" as any).update(payload).eq("id", p.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("products" as any).insert(payload);
+        if (error) throw error;
+      }
+      toast.success("Saved");
+      qc.invalidateQueries({ queryKey: ["products"] });
+      onClose();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
-    <form onSubmit={(e)=>{e.preventDefault(); onSave(p); onClose(); toast.success("Saved");}} className="space-y-3">
+    <form onSubmit={save} className="space-y-3">
       <div><Label>Name</Label><Input required value={p.name} onChange={(e)=>setP({...p, name:e.target.value})} /></div>
       <div className="grid grid-cols-2 gap-3">
         <div><Label>Team</Label><Input required value={p.team} onChange={(e)=>setP({...p, team:e.target.value})} /></div>
+        <div><Label>Category</Label>
+          <Select value={p.category} onValueChange={(v)=>setP({...p, category:v})}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>{["Club","National","Retro","Training"].map(c=><SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div><Label>Type</Label>
+          <Select value={p.type} onValueChange={(v)=>setP({...p, type:v})}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>{["Home","Away","Third"].map(c=><SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
         <div><Label>Stock</Label><Input type="number" value={p.stock} onChange={(e)=>setP({...p, stock:+e.target.value})} /></div>
         <div><Label>Price (PKR)</Label><Input type="number" required value={p.price} onChange={(e)=>setP({...p, price:+e.target.value})} /></div>
-        <div><Label>Sale Price (optional)</Label><Input type="number" value={p.salePrice ?? ""} onChange={(e)=>setP({...p, salePrice:e.target.value?+e.target.value:undefined})} /></div>
+        <div><Label>Sale Price (optional)</Label><Input type="number" value={p.sale_price ?? ""} onChange={(e)=>setP({...p, sale_price:e.target.value?+e.target.value:null})} /></div>
       </div>
-      <div><Label>Image URL</Label><Input value={p.image} onChange={(e)=>setP({...p, image:e.target.value})} placeholder="https://..." /></div>
-      <div><Label>Sizes (comma separated)</Label><Input value={p.sizes.join(",")} onChange={(e)=>setP({...p, sizes:e.target.value.split(",").map(s=>s.trim())})} /></div>
+      <div><Label>Image URL</Label><Input value={p.image_url} onChange={(e)=>setP({...p, image_url:e.target.value})} placeholder="https://..." /></div>
+      <div><Label>Sizes (comma separated)</Label><Input value={p.sizes.join(",")} onChange={(e)=>setP({...p, sizes:e.target.value.split(",").map(s=>s.trim()).filter(Boolean)})} /></div>
       <div><Label>Description</Label><Input value={p.description} onChange={(e)=>setP({...p, description:e.target.value})} /></div>
-      <DialogFooter><Button type="submit" className="bg-primary text-primary-foreground">Save Product</Button></DialogFooter>
+      <div className="flex gap-4 text-sm">
+        <label className="flex items-center gap-2"><input type="checkbox" checked={p.is_new} onChange={(e)=>setP({...p, is_new:e.target.checked})} /> New</label>
+        <label className="flex items-center gap-2"><input type="checkbox" checked={p.is_sale} onChange={(e)=>setP({...p, is_sale:e.target.checked})} /> Sale</label>
+      </div>
+      <DialogFooter><Button type="submit" disabled={busy} className="bg-primary text-primary-foreground">{busy?<Loader2 className="h-4 w-4 animate-spin" />:"Save Product"}</Button></DialogFooter>
     </form>
   );
 }
 
 function Products() {
-  const { products, addProduct, updateProduct, deleteProduct } = useAdmin();
+  const { data: products = [], isLoading } = useAdminProducts();
+  const qc = useQueryClient();
   const [editing, setEditing] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
+
+  const del = async (id: string) => {
+    if (!confirm("Delete this product?")) return;
+    const { error } = await supabase.from("products" as any).delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Deleted");
+    qc.invalidateQueries({ queryKey: ["products"] });
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-3xl">Products</h1>
         <Dialog open={open} onOpenChange={(o)=>{setOpen(o); if(!o) setEditing(null);}}>
           <DialogTrigger asChild><Button onClick={()=>{setEditing(null);setOpen(true);}} className="bg-primary text-primary-foreground"><Plus className="h-4 w-4 mr-1" />Add Product</Button></DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editing?"Edit":"Add"} Product</DialogTitle></DialogHeader>
-            <ProductForm initial={editing ?? undefined} onClose={()=>{setOpen(false); setEditing(null);}} onSave={(p)=>{ editing ? updateProduct(p.id, p) : addProduct(p); }} />
+            <ProductForm initial={editing ?? undefined} onClose={()=>{setOpen(false); setEditing(null);}} />
           </DialogContent>
         </Dialog>
       </div>
       <Card className="bg-card border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-secondary/50 text-left">
-              <tr><th className="p-3">Image</th><th className="p-3">Name</th><th className="p-3">Team</th><th className="p-3">Price</th><th className="p-3">Stock</th><th className="p-3"></th></tr>
-            </thead>
-            <tbody>
-              {products.map((p) => (
-                <tr key={p.id} className="border-t border-border">
-                  <td className="p-3"><img src={p.image} alt="" onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=500&fit=crop"; }} className="h-12 w-10 rounded object-cover" /></td>
-                  <td className="p-3 font-semibold">{p.name}</td>
-                  <td className="p-3 text-muted-foreground">{p.team}</td>
-                  <td className="p-3 text-primary">{formatPKR(p.salePrice ?? p.price)}</td>
-                  <td className="p-3">{p.stock}</td>
-                  <td className="p-3 text-right">
-                    <Button variant="ghost" size="icon" onClick={()=>{setEditing(p); setOpen(true);}}><Pencil className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={()=>{deleteProduct(p.id); toast.success("Deleted");}}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {isLoading ? <div className="p-10 text-center"><Loader2 className="inline animate-spin h-6 w-6 text-primary" /></div> : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/50 text-left">
+                <tr><th className="p-3">Image</th><th className="p-3">Name</th><th className="p-3">Team</th><th className="p-3">Price</th><th className="p-3">Stock</th><th className="p-3"></th></tr>
+              </thead>
+              <tbody>
+                {products.map((p) => (
+                  <tr key={p.id} className="border-t border-border">
+                    <td className="p-3"><img src={p.image} alt="" onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=500&fit=crop"; }} className="h-12 w-10 rounded object-cover" /></td>
+                    <td className="p-3 font-semibold">{p.name}</td>
+                    <td className="p-3 text-muted-foreground">{p.team}</td>
+                    <td className="p-3 text-primary">{formatPKR(p.salePrice ?? p.price)}</td>
+                    <td className="p-3">{p.stock === 0 ? <span className="text-destructive">Out</span> : p.stock}</td>
+                    <td className="p-3 text-right whitespace-nowrap">
+                      <Button variant="ghost" size="icon" onClick={()=>{setEditing(p); setOpen(true);}}><Pencil className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={()=>del(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
     </div>
   );
 }
 
 function statusColor(s: Order["status"]) {
-  return s==="Pending"?"bg-yellow-500/20 text-yellow-300":s==="Confirmed"?"bg-blue-500/20 text-blue-300":s==="Shipped"?"bg-purple-500/20 text-purple-300":"bg-primary/20 text-primary";
+  return s==="pending"?"bg-yellow-500/20 text-yellow-300":s==="confirmed"?"bg-blue-500/20 text-blue-300":s==="shipped"?"bg-purple-500/20 text-purple-300":s==="delivered"?"bg-primary/20 text-primary":"bg-destructive/20 text-destructive";
 }
 
 function Orders() {
-  const { orders, updateOrderStatus } = useAdmin();
+  const { data: orders = [], isLoading } = useOrders();
+  const qc = useQueryClient();
+
+  const updateStatus = async (id: string, status: Order["status"]) => {
+    const { error } = await supabase.from("orders" as any).update({ status }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    qc.invalidateQueries({ queryKey: ["orders"] });
+    toast.success("Status updated");
+  };
+
   return (
     <div>
       <h1 className="font-display text-3xl mb-6">Orders</h1>
-      {orders.length===0 ? <Card className="p-10 text-center text-muted-foreground bg-card border-border">No orders yet.</Card> : (
+      {isLoading ? <Card className="p-10 text-center bg-card border-border"><Loader2 className="inline animate-spin h-6 w-6 text-primary" /></Card> :
+       orders.length===0 ? <Card className="p-10 text-center text-muted-foreground bg-card border-border">No orders yet.</Card> : (
         <Card className="bg-card border-border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -211,17 +345,17 @@ function Orders() {
               <tbody>
                 {orders.map((o)=>(
                   <tr key={o.id} className="border-t border-border">
-                    <td className="p-3 font-mono text-xs">{o.id}</td>
-                    <td className="p-3 font-semibold">{o.customer.name}</td>
-                    <td className="p-3">{o.customer.phone}</td>
-                    <td className="p-3">{o.customer.city}</td>
-                    <td className="p-3">{o.items.reduce((s,i)=>s+i.quantity,0)}</td>
+                    <td className="p-3 font-mono text-xs">JPK-{o.id.slice(0,8).toUpperCase()}</td>
+                    <td className="p-3 font-semibold">{o.customer_name}</td>
+                    <td className="p-3">{o.phone}</td>
+                    <td className="p-3">{o.city}</td>
+                    <td className="p-3">{(o.items || []).reduce((s,i)=>s+i.quantity,0)}</td>
                     <td className="p-3 text-primary">{formatPKR(o.total)}</td>
                     <td className="p-3">
-                      <Select value={o.status} onValueChange={(v)=>updateOrderStatus(o.id, v as Order["status"])}>
+                      <Select value={o.status} onValueChange={(v)=>updateStatus(o.id, v as Order["status"])}>
                         <SelectTrigger className={`w-36 ${statusColor(o.status)}`}><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          {["Pending","Confirmed","Shipped","Delivered"].map((s)=><SelectItem key={s} value={s}>{s}</SelectItem>)}
+                          {["pending","confirmed","shipped","delivered","cancelled"].map((s)=><SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </td>
@@ -237,24 +371,25 @@ function Orders() {
 }
 
 function Customers() {
-  const orders = useAdmin((s)=>s.orders);
-  const customers = Array.from(new Map(orders.map((o)=>[o.customer.phone, o.customer])).values());
+  const { data: customers = [], isLoading } = useCustomers();
   return (
     <div>
       <h1 className="font-display text-3xl mb-6">Customers</h1>
-      {customers.length===0 ? <Card className="p-10 text-center text-muted-foreground bg-card border-border">No customers yet.</Card> : (
+      {isLoading ? <Card className="p-10 text-center bg-card border-border"><Loader2 className="inline animate-spin h-6 w-6 text-primary" /></Card> :
+       customers.length===0 ? <Card className="p-10 text-center text-muted-foreground bg-card border-border">No customers yet.</Card> : (
         <Card className="bg-card border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-secondary/50 text-left">
-              <tr><th className="p-3">Name</th><th className="p-3">Phone</th><th className="p-3">City</th><th className="p-3">Orders</th></tr>
+              <tr><th className="p-3">Name</th><th className="p-3">Phone</th><th className="p-3">City</th><th className="p-3">Orders</th><th className="p-3">Spent</th></tr>
             </thead>
             <tbody>
               {customers.map((c)=>(
-                <tr key={c.phone} className="border-t border-border">
+                <tr key={c.id} className="border-t border-border">
                   <td className="p-3 font-semibold">{c.name}</td>
                   <td className="p-3">{c.phone}</td>
                   <td className="p-3">{c.city}</td>
-                  <td className="p-3"><Badge className="bg-primary/15 text-primary">{orders.filter(o=>o.customer.phone===c.phone).length}</Badge></td>
+                  <td className="p-3"><Badge className="bg-primary/15 text-primary">{c.total_orders}</Badge></td>
+                  <td className="p-3 text-primary">{formatPKR(c.total_spent)}</td>
                 </tr>
               ))}
             </tbody>
@@ -266,15 +401,46 @@ function Customers() {
 }
 
 function SettingsTab() {
+  const { settings, isLoading } = useSettings();
+  const qc = useQueryClient();
+  const [form, setForm] = useState<Stg>(settings);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { setForm(settings); }, [settings]);
+
+  const save = async () => {
+    setBusy(true);
+    try {
+      const { error } = await supabase.from("settings" as any).update({
+        whatsapp_number: form.whatsapp_number,
+        store_name: form.store_name,
+        free_shipping_above: form.free_shipping_above,
+        shipping_cost: form.shipping_cost,
+      }).eq("id", form.id);
+      if (error) throw error;
+      qc.invalidateQueries({ queryKey: ["settings"] });
+      toast.success("Settings saved");
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (isLoading) return <Card className="p-10 text-center bg-card border-border"><Loader2 className="inline animate-spin h-6 w-6 text-primary" /></Card>;
+
   return (
     <div>
       <h1 className="font-display text-3xl mb-6">Settings</h1>
       <Card className="p-6 bg-card border-border max-w-xl">
         <div className="space-y-4">
-          <div><Label>Store Name</Label><Input defaultValue="JerseyPK" /></div>
-          <div><Label>WhatsApp Number</Label><Input defaultValue="+92 300 0000000" /></div>
-          <div><Label>Free Shipping Above (PKR)</Label><Input type="number" defaultValue={2000} /></div>
-          <Button onClick={()=>toast.success("Settings saved")} className="bg-primary text-primary-foreground">Save Settings</Button>
+          <div><Label>Store Name</Label><Input value={form.store_name} onChange={(e)=>setForm({...form, store_name:e.target.value})} /></div>
+          <div><Label>WhatsApp Number</Label><Input value={form.whatsapp_number} onChange={(e)=>setForm({...form, whatsapp_number:e.target.value})} placeholder="+923XXXXXXXXX" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>Free Shipping Above (PKR)</Label><Input type="number" value={form.free_shipping_above} onChange={(e)=>setForm({...form, free_shipping_above:+e.target.value})} /></div>
+            <div><Label>Shipping Cost (PKR)</Label><Input type="number" value={form.shipping_cost} onChange={(e)=>setForm({...form, shipping_cost:+e.target.value})} /></div>
+          </div>
+          <Button onClick={save} disabled={busy} className="bg-primary text-primary-foreground">{busy?<Loader2 className="h-4 w-4 animate-spin" />:"Save Settings"}</Button>
         </div>
       </Card>
     </div>

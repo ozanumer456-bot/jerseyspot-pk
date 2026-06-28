@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Search, ShoppingCart, Menu, Shield } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -10,14 +10,15 @@ import { useCart } from "@/store/cart";
 const links = [
   { to: "/", label: "Home" },
   { to: "/shop", label: "Shop" },
-  { to: "/shop", label: "Teams", search: { category: "Club" } },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
 ];
 
 export function Navbar() {
   const count = useCart((s) => s.count());
+  const [mounted, setMounted] = useState(false);
   const [q, setQ] = useState("");
+  useEffect(() => { setMounted(true); }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
@@ -49,7 +50,7 @@ export function Navbar() {
           </Link>
           <Link to="/cart" className="relative">
             <Button variant="ghost" size="icon"><ShoppingCart className="h-5 w-5" /></Button>
-            {count > 0 && (
+            {mounted && count > 0 && (
               <Badge className="absolute -top-1 -right-1 h-5 min-w-5 px-1 bg-primary text-primary-foreground">{count}</Badge>
             )}
           </Link>
