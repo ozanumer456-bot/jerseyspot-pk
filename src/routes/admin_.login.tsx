@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
-export const Route = createFileRoute("/admin/login")({
+export const Route = createFileRoute("/admin_/login")({
   head: () => ({ meta: [{ title: "Admin Login — JerseyPK" }] }),
   component: AdminLogin,
 });
