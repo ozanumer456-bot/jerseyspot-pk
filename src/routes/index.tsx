@@ -19,10 +19,16 @@ export const Route = createFileRoute("/")({
 });
 
 function Countdown() {
-  const target = (() => { const d = new Date(); d.setHours(d.getHours() + 12); return d.getTime(); })();
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
-  const diff = Math.max(0, target - now);
+  const [now, setNow] = useState<number | null>(null);
+  const [target, setTarget] = useState<number | null>(null);
+  useEffect(() => {
+    const t = Date.now() + 12 * 3.6e6;
+    setTarget(t);
+    setNow(Date.now());
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const diff = now != null && target != null ? Math.max(0, target - now) : 12 * 3.6e6;
   const h = String(Math.floor(diff / 3.6e6)).padStart(2, "0");
   const m = String(Math.floor((diff % 3.6e6) / 6e4)).padStart(2, "0");
   const s = String(Math.floor((diff % 6e4) / 1e3)).padStart(2, "0");
@@ -37,6 +43,7 @@ function Countdown() {
     </div>
   );
 }
+
 
 const categories = [
   { name: "Club Jerseys", img: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=400&fit=crop", to: "Club" },
