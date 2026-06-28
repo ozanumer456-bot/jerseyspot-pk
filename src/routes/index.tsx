@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
-import { SAMPLE_PRODUCTS } from "@/lib/products";
+import { useProducts } from "@/lib/products";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -52,7 +52,8 @@ const testimonials = [
 ];
 
 function Home() {
-  const featured = SAMPLE_PRODUCTS.slice(0, 8);
+  const { data: all = [] } = useProducts();
+  const featured = all.slice(0, 8);
   return (
     <SiteLayout>
       {/* HERO */}
