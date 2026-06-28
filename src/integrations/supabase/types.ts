@@ -14,16 +14,216 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customers: {
+        Row: {
+          city: string
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          total_orders: number
+          total_spent: number
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          id?: string
+          name: string
+          phone: string
+          total_orders?: number
+          total_spent?: number
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          total_orders?: number
+          total_spent?: number
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          customer_name: string
+          id: string
+          items: Json
+          payment_method: string
+          phone: string
+          postal_code: string | null
+          shipping: number
+          status: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          address: string
+          city: string
+          created_at?: string
+          customer_name: string
+          id?: string
+          items: Json
+          payment_method: string
+          phone: string
+          postal_code?: string | null
+          shipping?: number
+          status?: string
+          subtotal: number
+          total: number
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          customer_name?: string
+          id?: string
+          items?: Json
+          payment_method?: string
+          phone?: string
+          postal_code?: string | null
+          shipping?: number
+          status?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string
+          is_new: boolean
+          is_sale: boolean
+          name: string
+          price: number
+          rating: number
+          sale_price: number | null
+          sizes: string[]
+          stock: number
+          team: string
+          type: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url: string
+          is_new?: boolean
+          is_sale?: boolean
+          name: string
+          price: number
+          rating?: number
+          sale_price?: number | null
+          sizes?: string[]
+          stock?: number
+          team: string
+          type?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string
+          is_new?: boolean
+          is_sale?: boolean
+          name?: string
+          price?: number
+          rating?: number
+          sale_price?: number | null
+          sizes?: string[]
+          stock?: number
+          team?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          free_shipping_above: number
+          id: string
+          shipping_cost: number
+          singleton: boolean
+          store_name: string
+          whatsapp_number: string
+        }
+        Insert: {
+          free_shipping_above?: number
+          id?: string
+          shipping_cost?: number
+          singleton?: boolean
+          store_name?: string
+          whatsapp_number?: string
+        }
+        Update: {
+          free_shipping_above?: number
+          id?: string
+          shipping_cost?: number
+          singleton?: boolean
+          store_name?: string
+          whatsapp_number?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      place_order: {
+        Args: {
+          p_address: string
+          p_city: string
+          p_customer_name: string
+          p_items: Json
+          p_payment_method: string
+          p_phone: string
+          p_postal_code: string
+          p_shipping: number
+          p_subtotal: number
+          p_total: number
+        }
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +350,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
