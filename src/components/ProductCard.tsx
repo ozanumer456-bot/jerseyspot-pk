@@ -12,7 +12,8 @@ import { onImgError } from "@/lib/img-fallback";
 export function ProductCard({ p }: { p: Product }) {
   const add = useCart((s) => s.add);
   const wish = useWishlist();
-  const onSale = p.salePrice && p.salePrice < p.price;
+  const onSale = !!(p.salePrice && p.salePrice < p.price);
+  const outOfStock = p.stock <= 0;
   const liked = wish.ids.includes(p.id);
 
   return (
@@ -23,6 +24,7 @@ export function ProductCard({ p }: { p: Product }) {
           <div className="absolute top-3 left-3 flex flex-col gap-1">
             {p.isNew && <Badge className="bg-primary text-primary-foreground">NEW</Badge>}
             {onSale && <Badge className="bg-destructive text-destructive-foreground">SALE</Badge>}
+            {outOfStock && <Badge className="bg-secondary text-foreground">OUT OF STOCK</Badge>}
           </div>
           <button
             onClick={(e) => { e.preventDefault(); wish.toggle(p.id); }}
@@ -53,13 +55,14 @@ export function ProductCard({ p }: { p: Product }) {
           )}
         </div>
         <Button
-          className="w-full mt-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
+          disabled={outOfStock}
+          className="w-full mt-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold disabled:opacity-50"
           onClick={() => {
             add({ productId: p.id, name: p.name, image: p.image, price: p.salePrice ?? p.price, size: p.sizes[0] });
             toast.success(`${p.name} added to cart`);
           }}
         >
-          <ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart
+          <ShoppingCart className="h-4 w-4 mr-2" /> {outOfStock ? "Out of Stock" : "Add to Cart"}
         </Button>
       </div>
     </Card>

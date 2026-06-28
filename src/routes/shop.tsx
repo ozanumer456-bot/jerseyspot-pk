@@ -3,14 +3,14 @@ import { useMemo, useState } from "react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { SlidersHorizontal } from "lucide-react";
-import { SAMPLE_PRODUCTS, TEAMS, SIZES, TYPES, formatPKR } from "@/lib/products";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SlidersHorizontal, Loader2 } from "lucide-react";
+import { SIZES, TYPES, formatPKR, useProducts } from "@/lib/products";
 
 export const Route = createFileRoute("/shop")({
   validateSearch: (s: Record<string, unknown>) => ({ q: (s.q as string) || "" }),
@@ -18,13 +18,13 @@ export const Route = createFileRoute("/shop")({
   component: Shop,
 });
 
-function Filters({ teams, setTeams, sizes, setSizes, types, setTypes, price, setPrice }: any) {
+function Filters({ allTeams, teams, setTeams, sizes, setSizes, types, setTypes, price, setPrice }: any) {
   return (
     <div className="space-y-6">
       <div>
         <h3 className="font-display text-lg mb-3">Team</h3>
         <div className="space-y-2 max-h-60 overflow-auto pr-2">
-          {TEAMS.map((t) => (
+          {allTeams.map((t: string) => (
             <label key={t} className="flex items-center gap-2 cursor-pointer">
               <Checkbox checked={teams.includes(t)} onCheckedChange={(c) => setTeams(c ? [...teams, t] : teams.filter((x: string) => x !== t))} />
               <span className="text-sm">{t}</span>
@@ -75,8 +75,11 @@ function Shop() {
   const [price, setPrice] = useState<number[]>([1000, 5000]);
   const [sort, setSort] = useState("newest");
 
+  const { data: all = [], isLoading, error } = useProducts();
+  const allTeams = useMemo(() => Array.from(new Set(all.map((p) => p.team))).sort(), [all]);
+
   const products = useMemo(() => {
-    let list = SAMPLE_PRODUCTS.filter((p) => {
+    let list = all.filter((p) => {
       const pr = p.salePrice ?? p.price;
       if (search && !`${p.name} ${p.team}`.toLowerCase().includes(search.toLowerCase())) return false;
       if (teams.length && !teams.includes(p.team)) return false;
@@ -89,16 +92,16 @@ function Shop() {
     if (sort === "high") list = [...list].sort((a,b)=>(b.salePrice??b.price)-(a.salePrice??a.price));
     if (sort === "popular") list = [...list].sort((a,b)=>b.rating-a.rating);
     return list;
-  }, [search, teams, sizes, types, price, sort]);
+  }, [all, search, teams, sizes, types, price, sort]);
 
-  const filterProps = { teams, setTeams, sizes, setSizes, types, setTypes, price, setPrice };
+  const filterProps = { allTeams, teams, setTeams, sizes, setSizes, types, setTypes, price, setPrice };
 
   return (
     <SiteLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="font-display text-4xl md:text-5xl">All Jerseys</h1>
-          <p className="text-muted-foreground mt-1">{products.length} products available</p>
+          <p className="text-muted-foreground mt-1">{isLoading ? "Loading..." : `${products.length} products available`}</p>
         </div>
 
         <div className="grid lg:grid-cols-[260px_1fr] gap-8">
@@ -130,8 +133,16 @@ function Shop() {
               </div>
             </div>
 
-            {products.length === 0 ? (
-              <div className="py-20 text-center text-muted-foreground">No jerseys match your filters.</div>
+            {error ? (
+              <div className="py-20 text-center text-destructive">Failed to load products. Check your connection.</div>
+            ) : isLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-[3/4] w-full" />
+                ))}
+              </div>
+            ) : products.length === 0 ? (
+              <div className="py-20 text-center text-muted-foreground"><Loader2 className="inline h-4 w-4 mr-2 opacity-0" />No jerseys match your filters.</div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                 {products.map((p) => <ProductCard key={p.id} p={p} />)}
@@ -143,6 +154,3 @@ function Shop() {
     </SiteLayout>
   );
 }
-
-// keep label import used
-void Label;

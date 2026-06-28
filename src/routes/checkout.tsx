@@ -7,10 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useCart } from "@/store/cart";
-import { useAdmin, type Order } from "@/store/admin";
 import { formatPKR } from "@/lib/products";
+import { useSettings, waLink } from "@/lib/settings";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — JerseyPK" }] }),
@@ -18,33 +21,57 @@ export const Route = createFileRoute("/checkout")({
 });
 
 const payments = [
-  { id: "COD", label: "Cash on Delivery", desc: "Pay when you receive your order" },
-  { id: "EasyPaisa", label: "EasyPaisa", desc: "Mobile wallet payment" },
-  { id: "JazzCash", label: "JazzCash", desc: "Mobile wallet payment" },
+  { id: "cod", label: "Cash on Delivery", desc: "Pay when you receive your order" },
+  { id: "easypaisa", label: "EasyPaisa", desc: "Mobile wallet payment" },
+  { id: "jazzcash", label: "JazzCash", desc: "Mobile wallet payment" },
 ] as const;
 
 function Checkout() {
   const { items, subtotal, clear } = useCart();
-  const addOrder = useAdmin((s) => s.addOrder);
+  const { settings } = useSettings();
+  const qc = useQueryClient();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", phone: "", city: "", address: "", postal: "" });
-  const [payment, setPayment] = useState<Order["payment"]>("COD");
+  const [payment, setPayment] = useState<typeof payments[number]["id"]>("cod");
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const sub = subtotal();
-  const shipping = sub >= 2000 ? 0 : 250;
+  const shipping = sub >= settings.free_shipping_above ? 0 : settings.shipping_cost;
   const total = sub + shipping;
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.phone || !form.city || !form.address) return;
-    const id = "JPK-" + Math.random().toString(36).slice(2, 8).toUpperCase();
-    addOrder({
-      id, customer: form, payment, status: "Pending", total, createdAt: Date.now(),
-      items: items.map((i) => ({ productId: i.productId, name: i.name, size: i.size, quantity: i.quantity, price: i.price })),
-    });
-    clear();
-    setOrderId(id);
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.rpc("place_order" as any, {
+        p_customer_name: form.name,
+        p_phone: form.phone,
+        p_city: form.city,
+        p_address: form.address,
+        p_postal_code: form.postal || null,
+        p_payment_method: payment,
+        p_items: items.map((i) => ({ product_id: i.productId, name: i.name, size: i.size, quantity: i.quantity, price: i.price })),
+        p_subtotal: sub,
+        p_shipping: shipping,
+        p_total: total,
+      });
+      if (error) throw error;
+      const id = (data as string) || "";
+      const short = id.slice(0, 8).toUpperCase();
+      clear();
+      qc.invalidateQueries({ queryKey: ["products"] });
+      setOrderId(short);
+
+      // WhatsApp confirmation
+      const msg = `Thank you ${form.name}! Your JerseyPK order #${short} has been confirmed. We will deliver soon. Total: ${formatPKR(total)}`;
+      window.open(waLink(form.phone, msg), "_blank", "noopener,noreferrer");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to place order");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (items.length === 0 && !orderId) {
@@ -100,7 +127,9 @@ function Checkout() {
             <div className="text-sm flex justify-between"><span className="text-muted-foreground">Shipping</span><span>{shipping===0?<span className="text-primary">FREE</span>:formatPKR(shipping)}</span></div>
             <Separator className="my-4" />
             <div className="flex justify-between font-display text-xl"><span>Total</span><span className="text-primary">{formatPKR(total)}</span></div>
-            <Button type="submit" size="lg" className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90">Place Order</Button>
+            <Button type="submit" size="lg" disabled={submitting} className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90">
+              {submitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Placing...</> : "Place Order"}
+            </Button>
           </Card>
         </form>
       </div>
@@ -111,9 +140,9 @@ function Checkout() {
           <p className="text-muted-foreground">Shukria! Your order has been placed successfully.</p>
           <div className="p-4 bg-secondary rounded-lg">
             <div className="text-xs text-muted-foreground">Order ID</div>
-            <div className="font-display text-2xl text-primary">{orderId}</div>
+            <div className="font-display text-2xl text-primary">JPK-{orderId}</div>
           </div>
-          <p className="text-sm text-muted-foreground">We'll contact you on your phone number shortly to confirm.</p>
+          <p className="text-sm text-muted-foreground">A WhatsApp confirmation has opened — send it to receive updates.</p>
           <Button onClick={() => navigate({ to: "/" })} className="bg-primary text-primary-foreground">Continue Shopping</Button>
         </DialogContent>
       </Dialog>

@@ -1,14 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Heart, ShoppingCart, Truck, Shield, RefreshCw } from "lucide-react";
+import { Heart, ShoppingCart, Truck, Shield, RefreshCw, Loader2 } from "lucide-react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { SAMPLE_PRODUCTS, formatPKR } from "@/lib/products";
+import { formatPKR, useProduct, useProducts } from "@/lib/products";
 import { useCart } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
 import { onImgError } from "@/lib/img-fallback";
@@ -19,23 +19,30 @@ export const Route = createFileRoute("/product/$id")({
 
 function ProductPage() {
   const { id } = Route.useParams();
-  const product = SAMPLE_PRODUCTS.find((p) => p.id === id);
+  const { data: product, isLoading } = useProduct(id);
+  const { data: all = [] } = useProducts();
   const navigate = useNavigate();
   const add = useCart((s) => s.add);
   const wish = useWishlist();
-  const [size, setSize] = useState(product?.sizes[0] ?? "M");
+  const [size, setSize] = useState<string>("");
   const [qty, setQty] = useState(1);
 
+  if (isLoading) {
+    return <SiteLayout><div className="container mx-auto px-4 py-20 text-center"><Loader2 className="inline animate-spin h-6 w-6 text-primary" /></div></SiteLayout>;
+  }
   if (!product) {
     return <SiteLayout><div className="container mx-auto px-4 py-20 text-center"><h1 className="font-display text-3xl">Product not found</h1><Link to="/shop" className="text-primary underline mt-4 inline-block">Back to shop</Link></div></SiteLayout>;
   }
 
+  const activeSize = size || product.sizes[0] || "M";
   const price = product.salePrice ?? product.price;
-  const related = SAMPLE_PRODUCTS.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4);
+  const outOfStock = product.stock <= 0;
+  const related = all.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4);
 
   const handleAdd = (buyNow = false) => {
-    add({ productId: product.id, name: product.name, image: product.image, price, size, quantity: qty });
-    toast.success(`${product.name} (${size}) × ${qty} added`);
+    if (outOfStock) return;
+    add({ productId: product.id, name: product.name, image: product.image, price, size: activeSize, quantity: qty });
+    toast.success(`${product.name} (${activeSize}) × ${qty} added`);
     if (buyNow) navigate({ to: "/cart" });
   };
 
@@ -67,6 +74,11 @@ function ProductPage() {
               <span className="font-display text-4xl text-primary">{formatPKR(price)}</span>
               {product.salePrice && <span className="text-lg line-through text-muted-foreground">{formatPKR(product.price)}</span>}
             </div>
+            {outOfStock ? (
+              <Badge className="mt-3 bg-destructive text-destructive-foreground">OUT OF STOCK</Badge>
+            ) : (
+              <p className="mt-3 text-sm text-muted-foreground">In stock: {product.stock}</p>
+            )}
             <p className="mt-4 text-muted-foreground">{product.description}</p>
 
             <div className="mt-6">
@@ -89,7 +101,7 @@ function ProductPage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map((s) => (
-                  <button key={s} onClick={() => setSize(s)} className={`h-11 min-w-12 px-4 rounded-md border font-semibold transition ${size===s?"bg-primary text-primary-foreground border-primary":"border-border hover:border-primary"}`}>{s}</button>
+                  <button key={s} onClick={() => setSize(s)} className={`h-11 min-w-12 px-4 rounded-md border font-semibold transition ${activeSize===s?"bg-primary text-primary-foreground border-primary":"border-border hover:border-primary"}`}>{s}</button>
                 ))}
               </div>
             </div>
@@ -100,10 +112,10 @@ function ProductPage() {
                 <span className="w-12 text-center font-semibold">{qty}</span>
                 <button className="h-11 w-11 hover:bg-secondary" onClick={() => setQty(qty+1)}>+</button>
               </div>
-              <Button size="lg" onClick={() => handleAdd(false)} className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1"><ShoppingCart className="h-4 w-4 mr-2" />Add to Cart</Button>
+              <Button size="lg" disabled={outOfStock} onClick={() => handleAdd(false)} className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1 disabled:opacity-50"><ShoppingCart className="h-4 w-4 mr-2" />{outOfStock ? "Out of Stock" : "Add to Cart"}</Button>
               <Button size="lg" variant="outline" onClick={() => wish.toggle(product.id)}><Heart className={`h-4 w-4 ${wish.has(product.id)?"fill-primary text-primary":""}`} /></Button>
             </div>
-            <Button size="lg" onClick={() => handleAdd(true)} variant="outline" className="w-full mt-3 border-primary text-primary hover:bg-primary hover:text-primary-foreground">Buy Now</Button>
+            <Button size="lg" disabled={outOfStock} onClick={() => handleAdd(true)} variant="outline" className="w-full mt-3 border-primary text-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-50">Buy Now</Button>
 
             <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
               <div><Truck className="h-5 w-5 mx-auto text-primary mb-1" />Free shipping above Rs. 2,000</div>
