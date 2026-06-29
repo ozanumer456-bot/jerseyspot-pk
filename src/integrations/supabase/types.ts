@@ -150,6 +150,8 @@ export type Database = {
         Row: {
           free_shipping_above: number
           id: string
+          karachi_shipping: number
+          other_city_shipping: number
           shipping_cost: number
           singleton: boolean
           store_name: string
@@ -158,6 +160,8 @@ export type Database = {
         Insert: {
           free_shipping_above?: number
           id?: string
+          karachi_shipping?: number
+          other_city_shipping?: number
           shipping_cost?: number
           singleton?: boolean
           store_name?: string
@@ -166,6 +170,8 @@ export type Database = {
         Update: {
           free_shipping_above?: number
           id?: string
+          karachi_shipping?: number
+          other_city_shipping?: number
           shipping_cost?: number
           singleton?: boolean
           store_name?: string
