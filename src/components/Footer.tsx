@@ -10,7 +10,7 @@ export function Footer() {
             <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground font-display text-lg">J</div>
             <span className="font-display text-2xl">Jersey<span className="text-primary">PK</span></span>
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">Pakistan ka favourite jersey store. Premium quality, cash on delivery, deliver all over Pakistan.</p>
+          <p className="mt-3 text-sm text-muted-foreground">Pakistan's favourite jersey store. Premium quality and cash on delivery, available across Pakistan.</p>
         </div>
         <div>
           <h4 className="font-display text-lg mb-3">Shop</h4>
@@ -36,7 +36,7 @@ export function Footer() {
             <a className="grid h-9 w-9 place-items-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition" href="#"><Facebook className="h-4 w-4" /></a>
             <a className="grid h-9 w-9 place-items-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition" href="#"><Instagram className="h-4 w-4" /></a>
             <a className="grid h-9 w-9 place-items-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition" href="#"><Twitter className="h-4 w-4" /></a>
-            <a className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground hover:opacity-90 transition" href="https://wa.me/923000000000?text=Hi%2C%20I%20want%20to%20order%20a%20jersey"><MessageCircle className="h-4 w-4" /></a>
+            <a className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground hover:opacity-90 transition" href="https://wa.me/923260035627?text=Hi%2C%20I%20want%20to%20order%20a%20jersey"><MessageCircle className="h-4 w-4" /></a>
           </div>
         </div>
       </div>

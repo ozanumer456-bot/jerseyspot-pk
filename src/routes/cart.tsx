@@ -17,7 +17,8 @@ function CartPage() {
   const { items, updateQty, remove, subtotal } = useCart();
   const { settings } = useSettings();
   const sub = subtotal();
-  const shipping = sub === 0 || sub >= settings.free_shipping_above ? 0 : settings.shipping_cost;
+  const estShipping = settings.other_city_shipping;
+  const shipping = sub === 0 || sub >= settings.free_shipping_above ? 0 : estShipping;
   const total = sub + shipping;
 
   return (
@@ -57,8 +58,8 @@ function CartPage() {
               <h2 className="font-display text-2xl mb-4">Order Summary</h2>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatPKR(sub)}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span>{shipping===0 ? <span className="text-primary">FREE</span> : formatPKR(shipping)}</span></div>
-                {shipping > 0 && <div className="text-xs text-muted-foreground">Add {formatPKR(2000 - sub)} more for free shipping</div>}
+                <div className="flex justify-between"><span className="text-muted-foreground">Shipping (est.)</span><span>{shipping===0 ? <span className="text-primary">FREE</span> : formatPKR(shipping)}</span></div>
+                {shipping > 0 && <div className="text-xs text-muted-foreground">Final shipping calculated by city at checkout. Add {formatPKR(settings.free_shipping_above - sub)} more for free shipping.</div>}
               </div>
               <Separator className="my-4" />
               <div className="flex justify-between font-display text-xl"><span>Total</span><span className="text-primary">{formatPKR(total)}</span></div>

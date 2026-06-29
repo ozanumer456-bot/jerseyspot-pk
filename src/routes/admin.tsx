@@ -416,6 +416,8 @@ function SettingsTab() {
         store_name: form.store_name,
         free_shipping_above: form.free_shipping_above,
         shipping_cost: form.shipping_cost,
+        karachi_shipping: form.karachi_shipping,
+        other_city_shipping: form.other_city_shipping,
       }).eq("id", form.id);
       if (error) throw error;
       qc.invalidateQueries({ queryKey: ["settings"] });
@@ -436,9 +438,10 @@ function SettingsTab() {
         <div className="space-y-4">
           <div><Label>Store Name</Label><Input value={form.store_name} onChange={(e)=>setForm({...form, store_name:e.target.value})} /></div>
           <div><Label>WhatsApp Number</Label><Input value={form.whatsapp_number} onChange={(e)=>setForm({...form, whatsapp_number:e.target.value})} placeholder="+923XXXXXXXXX" /></div>
+          <div><Label>Free Shipping Above (PKR)</Label><Input type="number" value={form.free_shipping_above} onChange={(e)=>setForm({...form, free_shipping_above:+e.target.value})} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Free Shipping Above (PKR)</Label><Input type="number" value={form.free_shipping_above} onChange={(e)=>setForm({...form, free_shipping_above:+e.target.value})} /></div>
-            <div><Label>Shipping Cost (PKR)</Label><Input type="number" value={form.shipping_cost} onChange={(e)=>setForm({...form, shipping_cost:+e.target.value})} /></div>
+            <div><Label>Karachi Shipping (PKR)</Label><Input type="number" value={form.karachi_shipping} onChange={(e)=>setForm({...form, karachi_shipping:+e.target.value})} /></div>
+            <div><Label>Other Cities Shipping (PKR)</Label><Input type="number" value={form.other_city_shipping} onChange={(e)=>setForm({...form, other_city_shipping:+e.target.value})} /></div>
           </div>
           <Button onClick={save} disabled={busy} className="bg-primary text-primary-foreground">{busy?<Loader2 className="h-4 w-4 animate-spin" />:"Save Settings"}</Button>
         </div>

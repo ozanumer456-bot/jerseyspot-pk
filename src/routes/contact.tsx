@@ -20,7 +20,7 @@ function Contact() {
         <h1 className="font-display text-5xl mb-8">Contact Us</h1>
         <div className="grid md:grid-cols-[1fr_1.5fr] gap-8">
           <div className="space-y-4">
-            {[{i:Phone,l:"Call us",v:"+92 300 0000000"},{i:MessageCircle,l:"WhatsApp",v:"+92 300 0000000"},{i:Mail,l:"Email",v:"support@jerseypk.com"},{i:MapPin,l:"Address",v:"Karachi, Pakistan"}].map(({i:Icon,l,v})=>(
+            {[{i:Phone,l:"Call us",v:"+92 326 0035627"},{i:MessageCircle,l:"WhatsApp",v:"+92 326 0035627"},{i:Mail,l:"Email",v:"support@jerseypk.com"},{i:MapPin,l:"Address",v:"Karachi, Pakistan"}].map(({i:Icon,l,v})=>(
               <Card key={l} className="p-4 flex items-center gap-3 bg-card border-border">
                 <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/15 text-primary"><Icon className="h-5 w-5" /></div>
                 <div><div className="text-xs text-muted-foreground">{l}</div><div className="font-semibold">{v}</div></div>
