@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import pakistanJersey from "@/assets/pakistn.png.asset.json";
 import { ArrowRight, Truck, Shield, RefreshCw, Flame, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -102,7 +103,7 @@ function Home() {
           </div>
           <div className="relative hidden md:block">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-            <img src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&h=800&fit=crop" alt="Jersey" onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=800&fit=crop"; }} className="relative rounded-2xl object-cover w-full h-[520px] border border-border" />
+            <img src={pakistanJersey.url} alt="Pakistan Football Jersey" className="relative rounded-2xl object-cover w-full h-[520px] border border-border" />
           </div>
         </div>
       </section>
