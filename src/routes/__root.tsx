@@ -15,10 +15,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "JerseyPK — Pakistan Ka Favourite Jersey Store" },
-      { name: "description", content: "Premium football jerseys delivered all over Pakistan. Real Madrid, Barcelona, PSG, Pakistan national team & more. COD available." },
-      { property: "og:title", content: "JerseyPK — Pakistan Ka Favourite Jersey Store" },
-      { property: "og:description", content: "Premium football jerseys delivered all over Pakistan. COD available." },
+      { title: "JerseyPK — Pakistan's Favourite Jersey Store" },
+      { name: "description", content: "Premium football jerseys delivered across Pakistan. Real Madrid, Barcelona, PSG, Pakistan national team and more. Cash on delivery available." },
+      { property: "og:title", content: "JerseyPK — Pakistan's Favourite Jersey Store" },
+      { property: "og:description", content: "Premium football jerseys delivered across Pakistan. Cash on delivery available." },
       { property: "og:type", content: "website" },
     ],
     links: [

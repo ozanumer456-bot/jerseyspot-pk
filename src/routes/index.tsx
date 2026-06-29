@@ -11,24 +11,27 @@ import { useProducts } from "@/lib/products";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "JerseyPK — Pakistan Ka Favourite Jersey Store" },
+      { title: "JerseyPK — Pakistan's Favourite Jersey Store" },
       { name: "description", content: "Shop premium football jerseys with cash on delivery across Pakistan." },
     ],
   }),
   component: Home,
 });
 
+function nextMidnight() {
+  const d = new Date();
+  d.setHours(24, 0, 0, 0);
+  return d.getTime();
+}
+
 function Countdown() {
-  const [now, setNow] = useState<number | null>(null);
-  const [target, setTarget] = useState<number | null>(null);
+  const [diff, setDiff] = useState<number>(0);
   useEffect(() => {
-    const t = Date.now() + 12 * 3.6e6;
-    setTarget(t);
-    setNow(Date.now());
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    const tick = () => setDiff(Math.max(0, nextMidnight() - Date.now()));
+    tick();
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
-  const diff = now != null && target != null ? Math.max(0, target - now) : 12 * 3.6e6;
   const h = String(Math.floor(diff / 3.6e6)).padStart(2, "0");
   const m = String(Math.floor((diff % 3.6e6) / 6e4)).padStart(2, "0");
   const s = String(Math.floor((diff % 6e4) / 1e3)).padStart(2, "0");
@@ -53,9 +56,9 @@ const categories = [
 ];
 
 const testimonials = [
-  { name: "Ali Raza", city: "Karachi", text: "Quality bohat zabardast hai! Real Madrid jersey original lagti hai. Fast delivery bhi.", rating: 5 },
-  { name: "Hamza Khan", city: "Lahore", text: "Best jersey store in Pakistan. COD facility ke saath, koi tension nahi.", rating: 5 },
-  { name: "Bilal Ahmed", city: "Islamabad", text: "Pakistan team jersey order ki, perfect fit. Highly recommended bhai!", rating: 5 },
+  { name: "Ali Raza", city: "Karachi", text: "The quality is outstanding! My Real Madrid jersey looks completely original, and delivery was very fast.", rating: 5 },
+  { name: "Hamza Khan", city: "Lahore", text: "Best jersey store in Pakistan. With cash on delivery there is zero hassle.", rating: 5 },
+  { name: "Bilal Ahmed", city: "Islamabad", text: "Ordered the Pakistan team jersey and it fit perfectly. Highly recommended!", rating: 5 },
 ];
 
 function Home() {
@@ -73,10 +76,10 @@ function Home() {
           <div>
             <Badge className="bg-primary/15 text-primary border border-primary/40 mb-4">⚡ Free Delivery Above Rs. 2,000</Badge>
             <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">
-              Pakistan Ka <span className="text-gradient-green">Favourite</span><br />Jersey Store
+              Pakistan's <span className="text-gradient-green">Favourite</span><br />Jersey Store
             </h1>
             <p className="mt-5 text-lg text-muted-foreground max-w-lg">
-              Premium football jerseys, club aur national teams ki saari kits — delivered to your doorstep with Cash on Delivery.
+              Premium football jerseys — every club and national team kit, delivered to your doorstep with Cash on Delivery.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/shop">

@@ -11,7 +11,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/store/cart";
 import { formatPKR } from "@/lib/products";
-import { useSettings, waLink } from "@/lib/settings";
+import { useSettings, waLink, shippingForCity } from "@/lib/settings";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -37,7 +37,8 @@ function Checkout() {
   const [submitting, setSubmitting] = useState(false);
 
   const sub = subtotal();
-  const shipping = sub >= settings.free_shipping_above ? 0 : settings.shipping_cost;
+  const cityShipping = shippingForCity(form.city, settings);
+  const shipping = sub >= settings.free_shipping_above ? 0 : cityShipping;
   const total = sub + shipping;
 
   const submit = async (e: React.FormEvent) => {
@@ -137,7 +138,7 @@ function Checkout() {
       <Dialog open={!!orderId} onOpenChange={(o) => { if (!o) navigate({ to: "/" }); }}>
         <DialogContent>
           <DialogHeader><DialogTitle className="font-display text-2xl flex items-center gap-2"><CheckCircle2 className="text-primary" /> Order Placed!</DialogTitle></DialogHeader>
-          <p className="text-muted-foreground">Shukria! Your order has been placed successfully.</p>
+          <p className="text-muted-foreground">Thank you! Your order has been placed successfully.</p>
           <div className="p-4 bg-secondary rounded-lg">
             <div className="text-xs text-muted-foreground">Order ID</div>
             <div className="font-display text-2xl text-primary">JPK-{orderId}</div>

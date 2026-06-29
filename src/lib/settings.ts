@@ -7,15 +7,26 @@ export type Settings = {
   store_name: string;
   free_shipping_above: number;
   shipping_cost: number;
+  karachi_shipping: number;
+  other_city_shipping: number;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
   id: "",
-  whatsapp_number: "+923000000000",
+  whatsapp_number: "+923260035627",
   store_name: "JerseyPK",
   free_shipping_above: 2000,
-  shipping_cost: 200,
+  shipping_cost: 500,
+  karachi_shipping: 300,
+  other_city_shipping: 500,
 };
+
+export function shippingForCity(
+  city: string,
+  s: Pick<Settings, "karachi_shipping" | "other_city_shipping">,
+) {
+  return city.trim().toLowerCase() === "karachi" ? s.karachi_shipping : s.other_city_shipping;
+}
 
 async function fetchSettings(): Promise<Settings> {
   const { data, error } = await supabase
