@@ -144,8 +144,15 @@ function Home() {
           <Link to="/shop" className="text-primary hover:underline text-sm font-semibold">View all →</Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {featured.map((p) => <ProductCard key={p.id} p={p} />)}
+          {isLoading && featured.length === 0
+            ? Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="aspect-[4/5] rounded-xl bg-card border border-border animate-pulse" />
+              ))
+            : featured.map((p) => <ProductCard key={p.id} p={p} />)}
         </div>
+        {!isLoading && featured.length === 0 && (
+          <p className="text-center text-muted-foreground py-10">No products available yet.</p>
+        )}
       </section>
 
       {/* FLASH SALE */}
