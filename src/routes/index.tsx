@@ -101,9 +101,9 @@ function Home() {
               ))}
             </div>
           </div>
-          <div className="relative hidden md:block">
+          <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-            <img src={pakistanJersey.url} alt="Pakistan Football Jersey" className="relative rounded-2xl object-cover w-full h-[520px] border border-border" />
+            <img src={pakistanJersey.url} alt="Pakistan Football Jersey" className="relative rounded-2xl object-cover w-full h-[360px] md:h-[520px] border border-border" />
           </div>
         </div>
       </section>
