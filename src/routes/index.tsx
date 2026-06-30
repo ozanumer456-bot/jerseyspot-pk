@@ -65,7 +65,7 @@ const testimonials = [
 ];
 
 function Home() {
-  const { data: all = [] } = useProducts();
+  const { data: all = [], isLoading } = useProducts();
   const featured = all.slice(0, 8);
   return (
     <SiteLayout>
