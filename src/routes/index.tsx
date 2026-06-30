@@ -71,10 +71,7 @@ function Home() {
     <SiteLayout>
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <img src="https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1920&h=1080&fit=crop" alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} className="h-full w-full object-cover opacity-30" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
-        </div>
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-background to-background" />
         <div className="container mx-auto px-4 py-20 md:py-32 grid md:grid-cols-2 gap-10 items-center">
           <div>
             <Badge className="bg-primary/15 text-primary border border-primary/40 mb-4">⚡ Free Delivery Above Rs. 2,000</Badge>
@@ -105,7 +102,12 @@ function Home() {
           </div>
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-            <img src={pakistanJersey.url} alt="Pakistan Football Jersey" className="relative rounded-2xl object-cover w-full h-[360px] md:h-[520px] border border-border" />
+            <img
+              src={pakistanJersey.url}
+              alt="Pakistan Football Jersey"
+              onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&h=1000&fit=crop"; }}
+              className="relative rounded-2xl object-cover w-full h-[360px] md:h-[520px] border border-border"
+            />
           </div>
         </div>
       </section>
