@@ -26,7 +26,9 @@ function nextMidnight() {
 }
 
 function Countdown() {
-  const [diff, setDiff] = useState<number>(0);
+  const [diff, setDiff] = useState<number>(() =>
+    typeof window === "undefined" ? 0 : Math.max(0, nextMidnight() - Date.now())
+  );
   useEffect(() => {
     const tick = () => setDiff(Math.max(0, nextMidnight() - Date.now()));
     tick();
