@@ -33,10 +33,10 @@ export function Footer() {
         <div>
           <h4 className="font-display text-lg mb-3">Connect</h4>
           <div className="flex gap-3">
-            <a className="grid h-9 w-9 place-items-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition" href="#"><Facebook className="h-4 w-4" /></a>
-            <a className="grid h-9 w-9 place-items-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition" href="#"><Instagram className="h-4 w-4" /></a>
-            <a className="grid h-9 w-9 place-items-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition" href="#"><Twitter className="h-4 w-4" /></a>
-            <a className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground hover:opacity-90 transition" href="https://wa.me/923260035627?text=Hi%2C%20I%20want%20to%20order%20a%20jersey"><MessageCircle className="h-4 w-4" /></a>
+            <a aria-label="Facebook" target="_blank" rel="noopener noreferrer" className="grid h-9 w-9 place-items-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition" href="https://facebook.com/jerseypk"><Facebook className="h-4 w-4" /></a>
+            <a aria-label="Instagram" target="_blank" rel="noopener noreferrer" className="grid h-9 w-9 place-items-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition" href="https://instagram.com/jerseypk"><Instagram className="h-4 w-4" /></a>
+            <a aria-label="Twitter" target="_blank" rel="noopener noreferrer" className="grid h-9 w-9 place-items-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition" href="https://twitter.com/jerseypk"><Twitter className="h-4 w-4" /></a>
+            <a aria-label="WhatsApp" target="_blank" rel="noopener noreferrer" className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground hover:opacity-90 transition" href="https://wa.me/923260035627?text=Hi%2C%20I%20want%20to%20order%20a%20jersey"><MessageCircle className="h-4 w-4" /></a>
           </div>
         </div>
       </div>

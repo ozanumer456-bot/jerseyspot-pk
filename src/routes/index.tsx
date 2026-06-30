@@ -26,7 +26,9 @@ function nextMidnight() {
 }
 
 function Countdown() {
-  const [diff, setDiff] = useState<number>(0);
+  const [diff, setDiff] = useState<number>(() =>
+    typeof window === "undefined" ? 0 : Math.max(0, nextMidnight() - Date.now())
+  );
   useEffect(() => {
     const tick = () => setDiff(Math.max(0, nextMidnight() - Date.now()));
     tick();
@@ -63,16 +65,13 @@ const testimonials = [
 ];
 
 function Home() {
-  const { data: all = [] } = useProducts();
+  const { data: all = [], isLoading } = useProducts();
   const featured = all.slice(0, 8);
   return (
     <SiteLayout>
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <img src="https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1920&h=1080&fit=crop" alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} className="h-full w-full object-cover opacity-30" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
-        </div>
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-background to-background" />
         <div className="container mx-auto px-4 py-20 md:py-32 grid md:grid-cols-2 gap-10 items-center">
           <div>
             <Badge className="bg-primary/15 text-primary border border-primary/40 mb-4">⚡ Free Delivery Above Rs. 2,000</Badge>
@@ -103,7 +102,12 @@ function Home() {
           </div>
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-            <img src={pakistanJersey.url} alt="Pakistan Football Jersey" className="relative rounded-2xl object-cover w-full h-[360px] md:h-[520px] border border-border" />
+            <img
+              src={pakistanJersey.url}
+              alt="Pakistan Football Jersey"
+              onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&h=1000&fit=crop"; }}
+              className="relative rounded-2xl object-cover w-full h-[360px] md:h-[520px] border border-border"
+            />
           </div>
         </div>
       </section>
@@ -140,8 +144,15 @@ function Home() {
           <Link to="/shop" className="text-primary hover:underline text-sm font-semibold">View all →</Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {featured.map((p) => <ProductCard key={p.id} p={p} />)}
+          {isLoading && featured.length === 0
+            ? Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="aspect-[4/5] rounded-xl bg-card border border-border animate-pulse" />
+              ))
+            : featured.map((p) => <ProductCard key={p.id} p={p} />)}
         </div>
+        {!isLoading && featured.length === 0 && (
+          <p className="text-center text-muted-foreground py-10">No products available yet.</p>
+        )}
       </section>
 
       {/* FLASH SALE */}
