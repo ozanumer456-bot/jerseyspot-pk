@@ -148,33 +148,63 @@ export type Database = {
       }
       settings: {
         Row: {
+          email: string
+          facebook_url: string
           free_shipping_above: number
+          hero_headline: string
+          hero_image_url: string
+          hero_subheading: string
           id: string
+          instagram_url: string
           karachi_shipping: number
+          logo_letter: string
           other_city_shipping: number
+          primary_color: string
+          secondary_color: string
           shipping_cost: number
           singleton: boolean
           store_name: string
+          tagline: string
           whatsapp_number: string
         }
         Insert: {
+          email?: string
+          facebook_url?: string
           free_shipping_above?: number
+          hero_headline?: string
+          hero_image_url?: string
+          hero_subheading?: string
           id?: string
+          instagram_url?: string
           karachi_shipping?: number
+          logo_letter?: string
           other_city_shipping?: number
+          primary_color?: string
+          secondary_color?: string
           shipping_cost?: number
           singleton?: boolean
           store_name?: string
+          tagline?: string
           whatsapp_number?: string
         }
         Update: {
+          email?: string
+          facebook_url?: string
           free_shipping_above?: number
+          hero_headline?: string
+          hero_image_url?: string
+          hero_subheading?: string
           id?: string
+          instagram_url?: string
           karachi_shipping?: number
+          logo_letter?: string
           other_city_shipping?: number
+          primary_color?: string
+          secondary_color?: string
           shipping_cost?: number
           singleton?: boolean
           store_name?: string
+          tagline?: string
           whatsapp_number?: string
         }
         Relationships: []
