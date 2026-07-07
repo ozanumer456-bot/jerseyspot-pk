@@ -412,8 +412,18 @@ function SettingsTab() {
     setBusy(true);
     try {
       const { error } = await supabase.from("settings" as any).update({
-        whatsapp_number: form.whatsapp_number,
         store_name: form.store_name,
+        tagline: form.tagline,
+        primary_color: form.primary_color,
+        secondary_color: form.secondary_color,
+        logo_letter: (form.logo_letter || "K").slice(0, 1),
+        hero_headline: form.hero_headline,
+        hero_subheading: form.hero_subheading,
+        hero_image_url: form.hero_image_url,
+        whatsapp_number: form.whatsapp_number,
+        email: form.email,
+        instagram_url: form.instagram_url,
+        facebook_url: form.facebook_url,
         free_shipping_above: form.free_shipping_above,
         shipping_cost: form.shipping_cost,
         karachi_shipping: form.karachi_shipping,
@@ -421,7 +431,7 @@ function SettingsTab() {
       }).eq("id", form.id);
       if (error) throw error;
       qc.invalidateQueries({ queryKey: ["settings"] });
-      toast.success("Settings saved");
+      toast.success("Settings saved — changes are live");
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -431,21 +441,74 @@ function SettingsTab() {
 
   if (isLoading) return <Card className="p-10 text-center bg-card border-border"><Loader2 className="inline animate-spin h-6 w-6 text-primary" /></Card>;
 
+  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <Card className="p-6 bg-card border-border">
+      <h2 className="font-display text-xl mb-4 text-primary">{title}</h2>
+      <div className="space-y-4">{children}</div>
+    </Card>
+  );
+
   return (
     <div>
-      <h1 className="font-display text-3xl mb-6">Settings</h1>
-      <Card className="p-6 bg-card border-border max-w-xl">
-        <div className="space-y-4">
-          <div><Label>Store Name</Label><Input value={form.store_name} onChange={(e)=>setForm({...form, store_name:e.target.value})} /></div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="font-display text-3xl">Store Customization</h1>
+          <p className="text-sm text-muted-foreground mt-1">White-label your store — every change goes live instantly across the site.</p>
+        </div>
+        <Button onClick={save} disabled={busy} className="bg-primary text-primary-foreground">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save All Changes"}</Button>
+      </div>
+
+      <div className="grid gap-6 max-w-3xl">
+        <Section title="Branding">
+          <div><Label>Store Name</Label><Input value={form.store_name} onChange={(e)=>setForm({...form, store_name:e.target.value})} placeholder="KitVerse" /></div>
+          <div><Label>Store Tagline</Label><Input value={form.tagline} onChange={(e)=>setForm({...form, tagline:e.target.value})} placeholder="Shown in the footer" /></div>
+          <div><Label>Logo Letter (single character)</Label><Input maxLength={1} value={form.logo_letter} onChange={(e)=>setForm({...form, logo_letter:e.target.value.slice(0,1).toUpperCase()})} className="w-24 text-center font-display text-xl" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Primary Color</Label>
+              <div className="flex gap-2 items-center">
+                <input type="color" value={form.primary_color} onChange={(e)=>setForm({...form, primary_color:e.target.value})} className="h-10 w-14 rounded border border-border bg-background cursor-pointer" />
+                <Input value={form.primary_color} onChange={(e)=>setForm({...form, primary_color:e.target.value})} placeholder="#00FF87" />
+              </div>
+            </div>
+            <div>
+              <Label>Secondary Color</Label>
+              <div className="flex gap-2 items-center">
+                <input type="color" value={form.secondary_color} onChange={(e)=>setForm({...form, secondary_color:e.target.value})} className="h-10 w-14 rounded border border-border bg-background cursor-pointer" />
+                <Input value={form.secondary_color} onChange={(e)=>setForm({...form, secondary_color:e.target.value})} placeholder="#0F1420" />
+              </div>
+            </div>
+          </div>
+        </Section>
+
+        <Section title="Hero Section">
+          <div><Label>Hero Headline</Label><Input value={form.hero_headline} onChange={(e)=>setForm({...form, hero_headline:e.target.value})} /></div>
+          <div><Label>Hero Subheading</Label><Input value={form.hero_subheading} onChange={(e)=>setForm({...form, hero_subheading:e.target.value})} /></div>
+          <div><Label>Hero Image URL</Label><Input value={form.hero_image_url} onChange={(e)=>setForm({...form, hero_image_url:e.target.value})} placeholder="https://..." /></div>
+        </Section>
+
+        <Section title="Contact">
           <div><Label>WhatsApp Number</Label><Input value={form.whatsapp_number} onChange={(e)=>setForm({...form, whatsapp_number:e.target.value})} placeholder="+923XXXXXXXXX" /></div>
+          <div><Label>Email Address</Label><Input type="email" value={form.email} onChange={(e)=>setForm({...form, email:e.target.value})} placeholder="support@yourstore.com" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>Instagram URL</Label><Input value={form.instagram_url} onChange={(e)=>setForm({...form, instagram_url:e.target.value})} placeholder="https://instagram.com/..." /></div>
+            <div><Label>Facebook URL</Label><Input value={form.facebook_url} onChange={(e)=>setForm({...form, facebook_url:e.target.value})} placeholder="https://facebook.com/..." /></div>
+          </div>
+        </Section>
+
+        <Section title="Shipping">
           <div><Label>Free Shipping Above (PKR)</Label><Input type="number" value={form.free_shipping_above} onChange={(e)=>setForm({...form, free_shipping_above:+e.target.value})} /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Karachi Shipping (PKR)</Label><Input type="number" value={form.karachi_shipping} onChange={(e)=>setForm({...form, karachi_shipping:+e.target.value})} /></div>
             <div><Label>Other Cities Shipping (PKR)</Label><Input type="number" value={form.other_city_shipping} onChange={(e)=>setForm({...form, other_city_shipping:+e.target.value})} /></div>
           </div>
-          <Button onClick={save} disabled={busy} className="bg-primary text-primary-foreground">{busy?<Loader2 className="h-4 w-4 animate-spin" />:"Save Settings"}</Button>
+        </Section>
+
+        <div className="flex justify-end">
+          <Button onClick={save} disabled={busy} size="lg" className="bg-primary text-primary-foreground">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save All Changes"}</Button>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
+
