@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { Branding } from "@/components/Branding";
 
 import appCss from "../styles.css?url";
 
