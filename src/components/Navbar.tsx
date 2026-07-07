@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/store/cart";
+import { useSettings } from "@/lib/settings";
 
 const links = [
   { to: "/", label: "Home" },
