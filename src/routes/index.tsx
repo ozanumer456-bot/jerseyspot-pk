@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { useProducts } from "@/lib/products";
+import { useSettings } from "@/lib/settings";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,9 +27,7 @@ function nextMidnight() {
 }
 
 function Countdown() {
-  const [diff, setDiff] = useState<number>(() =>
-    typeof window === "undefined" ? 0 : Math.max(0, nextMidnight() - Date.now())
-  );
+  const [diff, setDiff] = useState<number>(0);
   useEffect(() => {
     const tick = () => setDiff(Math.max(0, nextMidnight() - Date.now()));
     tick();
@@ -66,7 +65,9 @@ const testimonials = [
 
 function Home() {
   const { data: all = [], isLoading } = useProducts();
+  const { settings } = useSettings();
   const featured = all.slice(0, 8);
+  const heroImg = settings.hero_image_url || pakistanJersey.url;
   return (
     <SiteLayout>
       {/* HERO */}
@@ -74,12 +75,12 @@ function Home() {
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-background to-background" />
         <div className="container mx-auto px-4 py-20 md:py-32 grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <Badge className="bg-primary/15 text-primary border border-primary/40 mb-4">⚡ Free Delivery Above Rs. 2,000</Badge>
+            <Badge className="bg-primary/15 text-primary border border-primary/40 mb-4">⚡ Free Delivery Above Rs. {settings.free_shipping_above.toLocaleString()}</Badge>
             <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">
-              Pakistan's <span className="text-gradient-green">Favourite</span><br />Jersey Store
+              {settings.hero_headline}
             </h1>
             <p className="mt-5 text-lg text-muted-foreground max-w-lg">
-              Premium football jerseys — every club and national team kit, delivered to your doorstep with Cash on Delivery.
+              {settings.hero_subheading}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/shop">
@@ -103,9 +104,9 @@ function Home() {
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
             <img
-              src={pakistanJersey.url}
-              alt="Pakistan Football Jersey"
-              onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&h=1000&fit=crop"; }}
+              src={heroImg}
+              alt={settings.hero_headline}
+              onError={(e) => { e.currentTarget.src = pakistanJersey.url; }}
               className="relative rounded-2xl object-cover w-full h-[360px] md:h-[520px] border border-border"
             />
           </div>

@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { Branding } from "@/components/Branding";
 
 import appCss from "../styles.css?url";
 
@@ -15,10 +16,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "JerseyPK — Pakistan's Favourite Jersey Store" },
-      { name: "description", content: "Premium football jerseys delivered across Pakistan. Real Madrid, Barcelona, PSG, Pakistan national team and more. Cash on delivery available." },
-      { property: "og:title", content: "JerseyPK — Pakistan's Favourite Jersey Store" },
-      { property: "og:description", content: "Premium football jerseys delivered across Pakistan. Cash on delivery available." },
+      { title: "KitVerse — Premium Jersey Store" },
+      { name: "description", content: "Premium football jerseys delivered nationwide. Cash on delivery available." },
+      { property: "og:title", content: "KitVerse — Premium Jersey Store" },
+      { property: "og:description", content: "Premium football jerseys delivered nationwide. Cash on delivery available." },
       { property: "og:type", content: "website" },
     ],
     links: [
@@ -57,6 +58,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <Branding />
       <Outlet />
       <Toaster theme="dark" position="top-right" />
     </QueryClientProvider>
