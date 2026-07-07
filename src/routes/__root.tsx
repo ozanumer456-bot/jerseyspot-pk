@@ -58,6 +58,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <Branding />
       <Outlet />
       <Toaster theme="dark" position="top-right" />
     </QueryClientProvider>
