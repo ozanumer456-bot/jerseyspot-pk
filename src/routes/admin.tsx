@@ -325,6 +325,18 @@ function statusColor(s: Order["status"]) {
   return s==="pending"?"bg-yellow-500/20 text-yellow-300":s==="confirmed"?"bg-blue-500/20 text-blue-300":s==="shipped"?"bg-purple-500/20 text-purple-300":s==="delivered"?"bg-primary/20 text-primary":"bg-destructive/20 text-destructive";
 }
 
+function OrderActions({ o }: { o: Order }) {
+  const { settings } = useSettings();
+  const inv: InvoiceOrder = o as any;
+  return (
+    <div className="flex gap-1">
+      <Button variant="ghost" size="icon" title="View invoice" onClick={() => openInvoicePreview(inv, settings)}><Eye className="h-4 w-4" /></Button>
+      <Button variant="ghost" size="icon" title="Download PDF" onClick={() => downloadInvoice(inv, settings)}><Download className="h-4 w-4" /></Button>
+      <a href={invoiceWhatsAppLink(inv, settings)} target="_blank" rel="noreferrer" title="Send via WhatsApp" className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-secondary"><MessageCircle className="h-4 w-4 text-primary" /></a>
+    </div>
+  );
+}
+
 function Orders() {
   const { data: orders = [], isLoading } = useOrders();
   const qc = useQueryClient();
@@ -345,12 +357,12 @@ function Orders() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-secondary/50 text-left">
-                <tr><th className="p-3">Order ID</th><th className="p-3">Customer</th><th className="p-3">Phone</th><th className="p-3">City</th><th className="p-3">Items</th><th className="p-3">Total</th><th className="p-3">Status</th></tr>
+                <tr><th className="p-3">Order ID</th><th className="p-3">Customer</th><th className="p-3">Phone</th><th className="p-3">City</th><th className="p-3">Items</th><th className="p-3">Total</th><th className="p-3">Status</th><th className="p-3">Invoice</th></tr>
               </thead>
               <tbody>
                 {orders.map((o)=>(
                   <tr key={o.id} className="border-t border-border">
-                    <td className="p-3 font-mono text-xs">JPK-{o.id.slice(0,8).toUpperCase()}</td>
+                    <td className="p-3 font-mono text-xs">{invoiceNumber(o.id)}</td>
                     <td className="p-3 font-semibold">{o.customer_name}</td>
                     <td className="p-3">{o.phone}</td>
                     <td className="p-3">{o.city}</td>
@@ -364,6 +376,7 @@ function Orders() {
                         </SelectContent>
                       </Select>
                     </td>
+                    <td className="p-3"><OrderActions o={o} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -371,6 +384,210 @@ function Orders() {
           </div>
         </Card>
       )}
+    </div>
+  );
+}
+
+function Invoices() {
+  const { data: orders = [], isLoading } = useOrders();
+  const { settings } = useSettings();
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [q, setQ] = useState("");
+
+  const filtered = useMemo(() => {
+    return orders.filter((o) => {
+      const t = new Date(o.created_at).getTime();
+      if (from && t < new Date(from).getTime()) return false;
+      if (to && t > new Date(to).getTime() + 86400000) return false;
+      if (q) {
+        const needle = q.toLowerCase();
+        if (!o.customer_name.toLowerCase().includes(needle) && !invoiceNumber(o.id).toLowerCase().includes(needle) && !o.id.toLowerCase().includes(needle)) return false;
+      }
+      return true;
+    });
+  }, [orders, from, to, q]);
+
+  return (
+    <div>
+      <h1 className="font-display text-3xl mb-6">Invoices</h1>
+      <Card className="p-4 mb-4 bg-card border-border">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div><Label className="text-xs">Search</Label><Input value={q} onChange={(e)=>setQ(e.target.value)} placeholder="Customer or invoice ID" /></div>
+          <div><Label className="text-xs">From</Label><Input type="date" value={from} onChange={(e)=>setFrom(e.target.value)} /></div>
+          <div><Label className="text-xs">To</Label><Input type="date" value={to} onChange={(e)=>setTo(e.target.value)} /></div>
+          <div className="flex items-end"><Button variant="secondary" onClick={()=>{setFrom("");setTo("");setQ("");}}>Reset</Button></div>
+        </div>
+      </Card>
+      {isLoading ? <Card className="p-10 text-center bg-card border-border"><Loader2 className="inline animate-spin h-6 w-6 text-primary" /></Card> :
+       filtered.length===0 ? <Card className="p-10 text-center text-muted-foreground bg-card border-border">No invoices found.</Card> : (
+        <Card className="bg-card border-border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/50 text-left">
+                <tr><th className="p-3">Invoice</th><th className="p-3">Date</th><th className="p-3">Customer</th><th className="p-3">City</th><th className="p-3">Total</th><th className="p-3">Status</th><th className="p-3">Actions</th></tr>
+              </thead>
+              <tbody>
+                {filtered.map((o)=>(
+                  <tr key={o.id} className="border-t border-border">
+                    <td className="p-3 font-mono text-xs">{invoiceNumber(o.id)}</td>
+                    <td className="p-3">{new Date(o.created_at).toLocaleDateString()}</td>
+                    <td className="p-3 font-semibold">{o.customer_name}</td>
+                    <td className="p-3">{o.city}</td>
+                    <td className="p-3 text-primary">{formatPKR(o.total)}</td>
+                    <td className="p-3"><Badge className={statusColor(o.status)}>{o.status}</Badge></td>
+                    <td className="p-3">
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" title="View" onClick={() => openInvoicePreview(o as any, settings)}><Eye className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" title="Download PDF" onClick={() => downloadInvoice(o as any, settings)}><Download className="h-4 w-4" /></Button>
+                        <a href={invoiceWhatsAppLink(o as any, settings)} target="_blank" rel="noreferrer" title="WhatsApp" className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-secondary"><MessageCircle className="h-4 w-4 text-primary" /></a>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function exportOrdersCSV(orders: Order[]) {
+  const header = ["Invoice", "Date", "Customer", "Phone", "City", "Address", "Payment", "Status", "Items", "Subtotal", "Shipping", "Total"];
+  const esc = (v: any) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const rows = orders.map((o) => [
+    invoiceNumber(o.id),
+    new Date(o.created_at).toISOString(),
+    o.customer_name, o.phone, o.city, o.address, o.payment_method, o.status,
+    (o.items || []).map((i) => `${i.name} (${i.size || "-"}) x${i.quantity}`).join(" | "),
+    o.subtotal, o.shipping, o.total,
+  ].map(esc).join(","));
+  const csv = [header.map(esc).join(","), ...rows].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `orders-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function Reports() {
+  const { data: orders = [], isLoading } = useOrders();
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+
+  const active = orders.filter((o) => o.status !== "cancelled");
+  const revenueAll = active.reduce((s, o) => s + o.total, 0);
+  const monthOrders = active.filter((o) => new Date(o.created_at).getTime() >= monthStart);
+  const revenueMonth = monthOrders.reduce((s, o) => s + o.total, 0);
+
+  const productSales = new Map<string, { name: string; qty: number; revenue: number }>();
+  active.forEach((o) => (o.items || []).forEach((it) => {
+    const cur = productSales.get(it.name) || { name: it.name, qty: 0, revenue: 0 };
+    cur.qty += it.quantity;
+    cur.revenue += it.price * it.quantity;
+    productSales.set(it.name, cur);
+  }));
+  const top5 = [...productSales.values()].sort((a, b) => b.qty - a.qty).slice(0, 5);
+
+  const karachiRev = active.filter((o) => o.city.trim().toLowerCase() === "karachi").reduce((s, o) => s + o.total, 0);
+  const otherRev = revenueAll - karachiRev;
+  const cityTotal = karachiRev + otherRev || 1;
+
+  // Last 30 days daily counts
+  const days: { label: string; count: number; revenue: number }[] = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate() - i);
+    const next = new Date(d); next.setDate(d.getDate() + 1);
+    const dayOrders = active.filter((o) => {
+      const t = new Date(o.created_at).getTime();
+      return t >= d.getTime() && t < next.getTime();
+    });
+    days.push({
+      label: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+      count: dayOrders.length,
+      revenue: dayOrders.reduce((s, o) => s + o.total, 0),
+    });
+  }
+  const maxCount = Math.max(1, ...days.map((d) => d.count));
+
+  if (isLoading) return <Card className="p-10 text-center bg-card border-border"><Loader2 className="inline animate-spin h-6 w-6 text-primary" /></Card>;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <h1 className="font-display text-3xl">Reports</h1>
+        <Button onClick={() => exportOrdersCSV(orders)} className="bg-primary text-primary-foreground"><Download className="h-4 w-4 mr-1" />Export Orders CSV</Button>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {[
+          { l: "Revenue (This Month)", v: formatPKR(revenueMonth) },
+          { l: "Revenue (All Time)", v: formatPKR(revenueAll) },
+          { l: "Orders This Month", v: monthOrders.length },
+          { l: "Orders (All Time)", v: active.length },
+        ].map((s) => (
+          <Card key={s.l} className="p-5 bg-card border-border">
+            <div className="text-xs text-muted-foreground uppercase tracking-wide">{s.l}</div>
+            <div className="font-display text-2xl mt-2 text-primary">{s.v}</div>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        <Card className="p-5 bg-card border-border">
+          <h2 className="font-display text-xl mb-4">Top 5 Best-Selling Products</h2>
+          {top5.length === 0 ? <p className="text-sm text-muted-foreground">No sales yet.</p> : (
+            <div className="space-y-3">
+              {top5.map((p, i) => {
+                const pct = (p.qty / top5[0].qty) * 100;
+                return (
+                  <div key={p.name}>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="font-semibold">{i + 1}. {p.name}</span>
+                      <span className="text-primary">{p.qty} sold · {formatPKR(p.revenue)}</span>
+                    </div>
+                    <div className="h-2 bg-secondary rounded overflow-hidden"><div className="h-full bg-primary" style={{ width: `${pct}%` }} /></div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+
+        <Card className="p-5 bg-card border-border">
+          <h2 className="font-display text-xl mb-4">Revenue by City</h2>
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between text-sm mb-1"><span>Karachi</span><span className="text-primary">{formatPKR(karachiRev)}</span></div>
+              <div className="h-3 bg-secondary rounded overflow-hidden"><div className="h-full bg-primary" style={{ width: `${(karachiRev / cityTotal) * 100}%` }} /></div>
+            </div>
+            <div>
+              <div className="flex justify-between text-sm mb-1"><span>Other Cities</span><span className="text-primary">{formatPKR(otherRev)}</span></div>
+              <div className="h-3 bg-secondary rounded overflow-hidden"><div className="h-full bg-primary/60" style={{ width: `${(otherRev / cityTotal) * 100}%` }} /></div>
+            </div>
+            <div className="pt-2 text-xs text-muted-foreground">Total: {formatPKR(cityTotal === 1 ? 0 : cityTotal)}</div>
+          </div>
+        </Card>
+      </div>
+
+      <Card className="p-5 bg-card border-border">
+        <h2 className="font-display text-xl mb-4">Daily Orders — Last 30 Days</h2>
+        <div className="flex items-end gap-1 h-40">
+          {days.map((d, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center group relative">
+              <div className="w-full bg-primary/80 hover:bg-primary rounded-t transition-all" style={{ height: `${(d.count / maxCount) * 100}%`, minHeight: d.count > 0 ? "4px" : "1px" }} title={`${d.label}: ${d.count} orders · ${formatPKR(d.revenue)}`} />
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between text-[10px] text-muted-foreground mt-2">
+          <span>{days[0].label}</span>
+          <span>{days[Math.floor(days.length / 2)].label}</span>
+          <span>{days[days.length - 1].label}</span>
+        </div>
+      </Card>
     </div>
   );
 }
