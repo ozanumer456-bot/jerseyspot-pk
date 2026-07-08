@@ -96,6 +96,8 @@ function Admin() {
         {tab === "dashboard" && <Dashboard />}
         {tab === "products" && <Products />}
         {tab === "orders" && <Orders />}
+        {tab === "invoices" && <Invoices />}
+        {tab === "reports" && <Reports />}
         {tab === "customers" && <Customers />}
         {tab === "settings" && <SettingsTab />}
       </main>
