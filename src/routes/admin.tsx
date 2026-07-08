@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut, Plus, Pencil, Trash2, Loader2, FileText, BarChart3, Eye, Download, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, signOut } from "@/lib/auth";
 import { formatPKR, type Product, mapProduct, type DbProduct } from "@/lib/products";
 import { useSettings, type Settings as Stg } from "@/lib/settings";
+import { downloadInvoice, openInvoicePreview, invoiceWhatsAppLink, invoiceNumber, type InvoiceOrder } from "@/lib/invoice";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — JerseyPK" }] }),
