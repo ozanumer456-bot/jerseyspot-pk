@@ -169,7 +169,7 @@ function Dashboard() {
           <div className="space-y-2">
             {orders.slice(0,5).map((o)=>(
               <div key={o.id} className="flex items-center justify-between p-3 rounded border border-border">
-                <div><div className="font-semibold font-mono text-xs">JPK-{o.id.slice(0,8).toUpperCase()}</div><div className="text-xs text-muted-foreground">{o.customer_name} · {o.city}</div></div>
+                <div><div className="font-semibold font-mono text-xs">{invoiceNumber(o.id)}</div><div className="text-xs text-muted-foreground">{o.customer_name} · {o.city}</div></div>
                 <div className="flex items-center gap-3">
                   <Badge className="bg-secondary text-foreground capitalize">{o.status}</Badge>
                   <div className="text-primary font-semibold">{formatPKR(o.total)}</div>
