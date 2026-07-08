@@ -37,7 +37,7 @@ type Order = {
   created_at: string;
 };
 
-type Tab = "dashboard" | "products" | "orders" | "customers" | "settings";
+type Tab = "dashboard" | "products" | "orders" | "invoices" | "reports" | "customers" | "settings";
 
 function Admin() {
   const navigate = useNavigate();
@@ -56,6 +56,8 @@ function Admin() {
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "products", label: "Products", icon: Package },
     { id: "orders", label: "Orders", icon: ShoppingBag },
+    { id: "invoices", label: "Invoices", icon: FileText },
+    { id: "reports", label: "Reports", icon: BarChart3 },
     { id: "customers", label: "Customers", icon: Users },
     { id: "settings", label: "Settings", icon: Settings },
   ];
