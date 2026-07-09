@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut, Plus, Pencil, Trash2, Loader2, FileText, BarChart3, Eye, Download, MessageCircle } from "lucide-react";
@@ -16,8 +16,8 @@ import { formatPKR, type Product, mapProduct, type DbProduct } from "@/lib/produ
 import { useSettings, type Settings as Stg } from "@/lib/settings";
 import { downloadInvoice, openInvoicePreview, invoiceWhatsAppLink, invoiceNumber, type InvoiceOrder } from "@/lib/invoice";
 
-export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin Dashboard — JerseyPK" }] }),
+export const Route = createFileRoute("/_authenticated/admin")({
+  head: () => ({ meta: [{ title: "Admin Dashboard — KitVerse" }] }),
   component: Admin,
 });
 
@@ -41,14 +41,10 @@ type Tab = "dashboard" | "products" | "orders" | "invoices" | "reports" | "custo
 
 function Admin() {
   const navigate = useNavigate();
-  const { user, isAdmin, loading } = useAuth();
+  const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("dashboard");
 
-  useEffect(() => {
-    if (!loading && (!user || !isAdmin)) navigate({ to: "/admin/login" });
-  }, [loading, user, isAdmin, navigate]);
-
-  if (loading || !user || !isAdmin) {
+  if (!user) {
     return <div className="min-h-screen grid place-items-center bg-background"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
