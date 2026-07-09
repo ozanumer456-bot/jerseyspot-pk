@@ -18,9 +18,10 @@ export function Footer() {
           <h4 className="font-display text-lg mb-3">Shop</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/shop" className="hover:text-primary">All Jerseys</Link></li>
-            <li><Link to="/shop" className="hover:text-primary">Club Jerseys</Link></li>
-            <li><Link to="/shop" className="hover:text-primary">National Team</Link></li>
-            <li><Link to="/shop" className="hover:text-primary">Retro</Link></li>
+            <li><Link to="/shop" search={{ category: "club" } as any} className="hover:text-primary">Club Jerseys</Link></li>
+            <li><Link to="/shop" search={{ category: "national" } as any} className="hover:text-primary">National Team</Link></li>
+            <li><Link to="/shop" search={{ category: "retro" } as any} className="hover:text-primary">Retro</Link></li>
+            <li><Link to="/shop" search={{ category: "training" } as any} className="hover:text-primary">Training</Link></li>
           </ul>
         </div>
         <div>
