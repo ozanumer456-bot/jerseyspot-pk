@@ -13,8 +13,8 @@ import { SlidersHorizontal, Loader2 } from "lucide-react";
 import { SIZES, TYPES, formatPKR, useProducts } from "@/lib/products";
 
 export const Route = createFileRoute("/shop")({
-  validateSearch: (s: Record<string, unknown>) => ({ q: (s.q as string) || "" }),
-  head: () => ({ meta: [{ title: "Shop Jerseys — JerseyPK" }, { name: "description", content: "Browse all football jerseys, clubs, national teams and retro kits." }] }),
+  validateSearch: (s: Record<string, unknown>) => ({ q: (s.q as string) || "", category: (s.category as string) || "" }),
+  head: () => ({ meta: [{ title: "Shop Jerseys — KitVerse" }, { name: "description", content: "Browse all football jerseys, clubs, national teams and retro kits." }] }),
   component: Shop,
 });
 
@@ -67,7 +67,7 @@ function Filters({ allTeams, teams, setTeams, sizes, setSizes, types, setTypes, 
 }
 
 function Shop() {
-  const { q } = Route.useSearch();
+  const { q, category } = Route.useSearch();
   const [search, setSearch] = useState(q);
   const [teams, setTeams] = useState<string[]>([]);
   const [sizes, setSizes] = useState<string[]>([]);
@@ -81,6 +81,7 @@ function Shop() {
   const products = useMemo(() => {
     let list = all.filter((p) => {
       const pr = p.salePrice ?? p.price;
+      if (category && p.category?.toLowerCase() !== category.toLowerCase()) return false;
       if (search && !`${p.name} ${p.team}`.toLowerCase().includes(search.toLowerCase())) return false;
       if (teams.length && !teams.includes(p.team)) return false;
       if (types.length && !types.includes(p.type)) return false;
@@ -92,7 +93,7 @@ function Shop() {
     if (sort === "high") list = [...list].sort((a,b)=>(b.salePrice??b.price)-(a.salePrice??a.price));
     if (sort === "popular") list = [...list].sort((a,b)=>b.rating-a.rating);
     return list;
-  }, [all, search, teams, sizes, types, price, sort]);
+  }, [all, search, teams, sizes, types, price, sort, category]);
 
   const filterProps = { allTeams, teams, setTeams, sizes, setSizes, types, setTypes, price, setPrice };
 

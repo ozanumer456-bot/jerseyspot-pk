@@ -58,13 +58,6 @@ function ProductPage() {
             <div className="aspect-[4/5] rounded-xl overflow-hidden bg-secondary border border-border">
               <img src={product.image} alt={product.name} onError={onImgError} className="h-full w-full object-cover" />
             </div>
-            <div className="grid grid-cols-4 gap-2 mt-3">
-              {[product.image, product.image, product.image, product.image].map((src, i) => (
-                <div key={i} className="aspect-square rounded-md overflow-hidden border border-border bg-secondary">
-                  <img src={src} alt="" onError={onImgError} className="h-full w-full object-cover" />
-                </div>
-              ))}
-            </div>
           </div>
 
           <div>

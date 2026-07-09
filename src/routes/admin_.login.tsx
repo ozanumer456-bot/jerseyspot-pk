@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/admin_/login")({
-  head: () => ({ meta: [{ title: "Admin Login — JerseyPK" }] }),
+  head: () => ({ meta: [{ title: "Admin Login — KitVerse" }] }),
   component: AdminLogin,
 });
 
@@ -55,8 +55,8 @@ function AdminLogin() {
     <div className="min-h-screen grid place-items-center bg-background p-4">
       <Card className="p-8 w-full max-w-md bg-card border-border">
         <div className="flex items-center gap-2 mb-6 justify-center">
-          <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary text-primary-foreground font-display text-xl">J</div>
-          <span className="font-display text-3xl">Jersey<span className="text-primary">PK</span> Admin</span>
+          <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary text-primary-foreground font-display text-xl">K</div>
+          <span className="font-display text-3xl">Kit<span className="text-primary">Verse</span> Admin</span>
         </div>
 
         <div className="flex gap-1 p-1 bg-secondary rounded-md mb-4">
