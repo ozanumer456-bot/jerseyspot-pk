@@ -9,7 +9,7 @@ import { formatPKR } from "@/lib/products";
 import { useSettings } from "@/lib/settings";
 
 export const Route = createFileRoute("/cart")({
-  head: () => ({ meta: [{ title: "Your Cart — JerseyPK" }] }),
+  head: () => ({ meta: [{ title: "Your Cart — KitVerse" }] }),
   component: CartPage,
 });
 

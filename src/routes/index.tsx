@@ -13,7 +13,7 @@ import { useSettings } from "@/lib/settings";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "JerseyPK — Pakistan's Favourite Jersey Store" },
+      { title: "KitVerse — Pakistan's Favourite Jersey Store" },
       { name: "description", content: "Shop premium football jerseys with cash on delivery across Pakistan." },
     ],
   }),

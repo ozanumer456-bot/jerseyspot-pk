@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Checkout — JerseyPK" }] }),
+  head: () => ({ meta: [{ title: "Checkout — KitVerse" }] }),
   component: Checkout,
 });
 
@@ -66,7 +66,7 @@ function Checkout() {
       setOrderId(short);
 
       // WhatsApp confirmation
-      const msg = `Thank you ${form.name}! Your JerseyPK order #${short} has been confirmed. We will deliver soon. Total: ${formatPKR(total)}`;
+      const msg = `Thank you ${form.name}! Your KitVerse order #${short} has been confirmed. We will deliver soon. Total: ${formatPKR(total)}`;
       window.open(waLink(form.phone, msg), "_blank", "noopener,noreferrer");
     } catch (err: any) {
       toast.error(err.message || "Failed to place order");
