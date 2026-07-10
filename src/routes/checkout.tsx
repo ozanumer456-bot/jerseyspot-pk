@@ -12,8 +12,10 @@ import { toast } from "sonner";
 import { useCart } from "@/store/cart";
 import { formatPKR } from "@/lib/products";
 import { useSettings, waLink, shippingForCity } from "@/lib/settings";
+import { useCurrentStore } from "@/lib/store-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — KitVerse" }] }),
