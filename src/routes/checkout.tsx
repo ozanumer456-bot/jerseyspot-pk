@@ -48,9 +48,11 @@ function Checkout() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.phone || !form.city || !form.address) return;
+    if (!storeId) { toast.error("Store not loaded yet"); return; }
     setSubmitting(true);
     try {
       const { data, error } = await supabase.rpc("place_order" as any, {
+        p_store_id: storeId,
         p_customer_name: form.name,
         p_phone: form.phone,
         p_city: form.city,
@@ -64,6 +66,7 @@ function Checkout() {
       });
       if (error) throw error;
       const id = (data as string) || "";
+
       const short = id.slice(0, 8).toUpperCase();
       clear();
       qc.invalidateQueries({ queryKey: ["products"] });
