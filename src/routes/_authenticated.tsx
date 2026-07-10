@@ -6,16 +6,15 @@ export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async ({ location }) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      throw redirect({ to: "/admin/login", search: { redirect: location.href } as any });
+      throw redirect({ to: "/auth", search: { redirect: location.href } as any });
     }
     const { data } = await supabase
       .from("user_roles" as any)
       .select("role")
       .eq("user_id", session.user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!data) {
-      throw redirect({ to: "/admin/login", search: { redirect: location.href } as any });
+      .in("role", ["admin", "superadmin"]);
+    if (!data || (data as any[]).length === 0) {
+      throw redirect({ to: "/auth", search: { redirect: location.href } as any });
     }
   },
   component: () => <Outlet />,
