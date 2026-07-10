@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrentStore } from "./store-context";
 
 export type Product = {
   id: string;
@@ -16,6 +17,7 @@ export type Product = {
   isNew?: boolean;
   isSale?: boolean;
   rating: number;
+  storeId?: string;
 };
 
 export type DbProduct = {
@@ -34,6 +36,7 @@ export type DbProduct = {
   description: string;
   rating: number;
   created_at: string;
+  store_id?: string;
 };
 
 export const SIZES = ["S", "M", "L", "XL", "XXL"];
@@ -60,32 +63,40 @@ export function mapProduct(d: DbProduct): Product {
     isNew: d.is_new,
     isSale: d.is_sale || (d.sale_price != null && d.sale_price < d.price),
     rating: d.rating ?? 4,
+    storeId: d.store_id,
   };
 }
 
-async function fetchProducts(): Promise<Product[]> {
-  const { data, error } = await supabase
-    .from("products" as any)
-    .select("*")
-    .order("created_at", { ascending: false });
+async function fetchProductsByStore(storeId: string | null): Promise<Product[]> {
+  let query = supabase.from("products" as any).select("*").order("created_at", { ascending: false });
+  if (storeId) query = query.eq("store_id", storeId);
+  const { data, error } = await query;
   if (error) throw error;
   return ((data as unknown as DbProduct[]) ?? []).map(mapProduct);
 }
 
-async function fetchProduct(id: string): Promise<Product | null> {
-  const { data, error } = await supabase
-    .from("products" as any)
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
+async function fetchProduct(id: string, storeId: string | null): Promise<Product | null> {
+  let query = supabase.from("products" as any).select("*").eq("id", id);
+  if (storeId) query = query.eq("store_id", storeId);
+  const { data, error } = await query.maybeSingle();
   if (error) throw error;
   return data ? mapProduct(data as unknown as DbProduct) : null;
 }
 
 export function useProducts() {
-  return useQuery({ queryKey: ["products"], queryFn: fetchProducts });
+  const { storeId, slug } = useCurrentStore();
+  return useQuery({
+    queryKey: ["products", slug, storeId],
+    queryFn: () => fetchProductsByStore(storeId),
+    enabled: !!storeId,
+  });
 }
 
 export function useProduct(id: string) {
-  return useQuery({ queryKey: ["product", id], queryFn: () => fetchProduct(id), enabled: !!id });
+  const { storeId, slug } = useCurrentStore();
+  return useQuery({
+    queryKey: ["product", slug, storeId, id],
+    queryFn: () => fetchProduct(id, storeId),
+    enabled: !!id && !!storeId,
+  });
 }
