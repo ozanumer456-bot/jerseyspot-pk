@@ -10,10 +10,10 @@ import { useSettings } from "@/lib/settings";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({ meta: [{ title: "Your Cart — KitVerse" }] }),
-  component: CartPage,
+  component: CartBody,
 });
 
-function CartPage() {
+export function CartBody() {
   const { items, updateQty, remove, subtotal } = useCart();
   const { settings } = useSettings();
   const sub = subtotal();
