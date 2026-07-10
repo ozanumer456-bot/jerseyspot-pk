@@ -31,8 +31,10 @@ const payments = [
 function Checkout() {
   const { items, subtotal, clear } = useCart();
   const { settings } = useSettings();
+  const { storeId } = useCurrentStore();
   const qc = useQueryClient();
   const navigate = useNavigate();
+
   const [form, setForm] = useState({ name: "", phone: "", city: "", address: "", postal: "" });
   const [payment, setPayment] = useState<typeof payments[number]["id"]>("cod");
   const [orderId, setOrderId] = useState<string | null>(null);
