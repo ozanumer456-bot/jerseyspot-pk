@@ -21,6 +21,7 @@ export type Database = {
           id: string
           name: string
           phone: string
+          store_id: string
           total_orders: number
           total_spent: number
         }
@@ -30,6 +31,7 @@ export type Database = {
           id?: string
           name: string
           phone: string
+          store_id: string
           total_orders?: number
           total_spent?: number
         }
@@ -39,10 +41,19 @@ export type Database = {
           id?: string
           name?: string
           phone?: string
+          store_id?: string
           total_orders?: number
           total_spent?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customers_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       orders: {
         Row: {
@@ -57,6 +68,7 @@ export type Database = {
           postal_code: string | null
           shipping: number
           status: string
+          store_id: string
           subtotal: number
           total: number
         }
@@ -72,6 +84,7 @@ export type Database = {
           postal_code?: string | null
           shipping?: number
           status?: string
+          store_id: string
           subtotal: number
           total: number
         }
@@ -87,10 +100,19 @@ export type Database = {
           postal_code?: string | null
           shipping?: number
           status?: string
+          store_id?: string
           subtotal?: number
           total?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -107,6 +129,7 @@ export type Database = {
           sale_price: number | null
           sizes: string[]
           stock: number
+          store_id: string
           team: string
           type: string
         }
@@ -124,6 +147,7 @@ export type Database = {
           sale_price?: number | null
           sizes?: string[]
           stock?: number
+          store_id: string
           team: string
           type?: string
         }
@@ -141,10 +165,19 @@ export type Database = {
           sale_price?: number | null
           sizes?: string[]
           stock?: number
+          store_id?: string
           team?: string
           type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       settings: {
         Row: {
@@ -209,26 +242,106 @@ export type Database = {
         }
         Relationships: []
       }
+      stores: {
+        Row: {
+          created_at: string
+          email: string
+          facebook_url: string
+          free_shipping_above: number
+          hero_headline: string
+          hero_image_url: string
+          hero_subheading: string
+          id: string
+          instagram_url: string
+          karachi_shipping: number
+          logo_letter: string
+          other_city_shipping: number
+          owner_email: string | null
+          primary_color: string
+          secondary_color: string
+          status: string
+          store_name: string
+          store_slug: string
+          tagline: string
+          whatsapp_number: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string
+          facebook_url?: string
+          free_shipping_above?: number
+          hero_headline?: string
+          hero_image_url?: string
+          hero_subheading?: string
+          id?: string
+          instagram_url?: string
+          karachi_shipping?: number
+          logo_letter?: string
+          other_city_shipping?: number
+          owner_email?: string | null
+          primary_color?: string
+          secondary_color?: string
+          status?: string
+          store_name?: string
+          store_slug: string
+          tagline?: string
+          whatsapp_number?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          facebook_url?: string
+          free_shipping_above?: number
+          hero_headline?: string
+          hero_image_url?: string
+          hero_subheading?: string
+          id?: string
+          instagram_url?: string
+          karachi_shipping?: number
+          logo_letter?: string
+          other_city_shipping?: number
+          owner_email?: string | null
+          primary_color?: string
+          secondary_color?: string
+          status?: string
+          store_name?: string
+          store_slug?: string
+          tagline?: string
+          whatsapp_number?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
+          store_id: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
+          store_id?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          store_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -242,6 +355,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_store_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _store_id: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_superadmin: { Args: { _user_id: string }; Returns: boolean }
       place_order: {
         Args: {
           p_address: string
@@ -252,6 +374,7 @@ export type Database = {
           p_phone: string
           p_postal_code: string
           p_shipping: number
+          p_store_id: string
           p_subtotal: number
           p_total: number
         }
@@ -259,7 +382,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "superadmin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -387,7 +510,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "superadmin"],
     },
   },
 } as const

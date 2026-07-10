@@ -8,6 +8,8 @@ import {
 import { type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { Branding } from "@/components/Branding";
+import { StoreProvider } from "@/lib/store-context";
+
 
 import appCss from "../styles.css?url";
 
@@ -58,9 +60,12 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <Branding />
-      <Outlet />
-      <Toaster theme="dark" position="top-right" />
+      <StoreProvider>
+        <Branding />
+        <Outlet />
+        <Toaster theme="dark" position="top-right" />
+      </StoreProvider>
     </QueryClientProvider>
+
   );
 }

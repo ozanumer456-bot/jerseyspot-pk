@@ -12,12 +12,14 @@ import { toast } from "sonner";
 import { useCart } from "@/store/cart";
 import { formatPKR } from "@/lib/products";
 import { useSettings, waLink, shippingForCity } from "@/lib/settings";
+import { useCurrentStore } from "@/lib/store-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
+
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — KitVerse" }] }),
-  component: Checkout,
+  component: CheckoutBody,
 });
 
 const payments = [
@@ -26,11 +28,13 @@ const payments = [
   { id: "jazzcash", label: "JazzCash", desc: "Mobile wallet payment" },
 ] as const;
 
-function Checkout() {
+export function CheckoutBody() {
   const { items, subtotal, clear } = useCart();
   const { settings } = useSettings();
+  const { storeId } = useCurrentStore();
   const qc = useQueryClient();
   const navigate = useNavigate();
+
   const [form, setForm] = useState({ name: "", phone: "", city: "", address: "", postal: "" });
   const [payment, setPayment] = useState<typeof payments[number]["id"]>("cod");
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -44,9 +48,11 @@ function Checkout() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.phone || !form.city || !form.address) return;
+    if (!storeId) { toast.error("Store not loaded yet"); return; }
     setSubmitting(true);
     try {
       const { data, error } = await supabase.rpc("place_order" as any, {
+        p_store_id: storeId,
         p_customer_name: form.name,
         p_phone: form.phone,
         p_city: form.city,
@@ -60,6 +66,7 @@ function Checkout() {
       });
       if (error) throw error;
       const id = (data as string) || "";
+
       const short = id.slice(0, 8).toUpperCase();
       clear();
       qc.invalidateQueries({ queryKey: ["products"] });

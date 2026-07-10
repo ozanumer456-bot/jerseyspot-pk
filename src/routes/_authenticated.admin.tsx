@@ -18,7 +18,7 @@ import { downloadInvoice, openInvoicePreview, invoiceWhatsAppLink, invoiceNumber
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — KitVerse" }] }),
-  component: Admin,
+  component: AdminBody,
 });
 
 type Order = {
@@ -39,7 +39,7 @@ type Order = {
 
 type Tab = "dashboard" | "products" | "orders" | "invoices" | "reports" | "customers" | "settings";
 
-function Admin() {
+export function AdminBody() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("dashboard");

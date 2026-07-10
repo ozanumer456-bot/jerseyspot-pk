@@ -15,7 +15,7 @@ import { SIZES, TYPES, formatPKR, useProducts } from "@/lib/products";
 export const Route = createFileRoute("/shop")({
   validateSearch: (s: Record<string, unknown>) => ({ q: (s.q as string) || "", category: (s.category as string) || "" }),
   head: () => ({ meta: [{ title: "Shop Jerseys — KitVerse" }, { name: "description", content: "Browse all football jerseys, clubs, national teams and retro kits." }] }),
-  component: Shop,
+  component: ShopBody,
 });
 
 function Filters({ allTeams, teams, setTeams, sizes, setSizes, types, setTypes, price, setPrice }: any) {
@@ -66,7 +66,7 @@ function Filters({ allTeams, teams, setTeams, sizes, setSizes, types, setTypes, 
   );
 }
 
-function Shop() {
+export function ShopBody() {
   const { q, category } = Route.useSearch();
   const [search, setSearch] = useState(q);
   const [teams, setTeams] = useState<string[]>([]);
