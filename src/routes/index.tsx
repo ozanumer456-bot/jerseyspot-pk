@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Shop premium football jerseys with cash on delivery across Pakistan." },
     ],
   }),
-  component: Home,
+  component: HomeBody,
 });
 
 function nextMidnight() {
@@ -63,7 +63,7 @@ const testimonials = [
   { name: "Bilal Ahmed", city: "Islamabad", text: "Ordered the Pakistan team jersey and it fit perfectly. Highly recommended!", rating: 5 },
 ];
 
-function Home() {
+export function HomeBody() {
   const { data: all = [], isLoading } = useProducts();
   const { settings } = useSettings();
   const featured = all.slice(0, 8);

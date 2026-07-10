@@ -19,7 +19,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — KitVerse" }] }),
-  component: Checkout,
+  component: CheckoutBody,
 });
 
 const payments = [
@@ -28,7 +28,7 @@ const payments = [
   { id: "jazzcash", label: "JazzCash", desc: "Mobile wallet payment" },
 ] as const;
 
-function Checkout() {
+export function CheckoutBody() {
   const { items, subtotal, clear } = useCart();
   const { settings } = useSettings();
   const { storeId } = useCurrentStore();
