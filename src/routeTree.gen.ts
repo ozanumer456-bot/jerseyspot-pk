@@ -19,6 +19,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as StoreSlugRouteImport } from './routes/store.$slug'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as AdminLoginRouteImport } from './routes/admin_.login'
+import { Route as AuthenticatedSuperadminRouteImport } from './routes/_authenticated.superadmin'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as StoreSlugIndexRouteImport } from './routes/store.$slug.index'
 import { Route as StoreSlugShopRouteImport } from './routes/store.$slug.shop'
@@ -76,6 +77,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedSuperadminRoute = AuthenticatedSuperadminRouteImport.update({
+  id: '/superadmin',
+  path: '/superadmin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/shop': typeof ShopRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/superadmin': typeof AuthenticatedSuperadminRoute
   '/admin/login': typeof AdminLoginRoute
   '/product/$id': typeof ProductIdRoute
   '/store/$slug': typeof StoreSlugRouteWithChildren
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/shop': typeof ShopRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/superadmin': typeof AuthenticatedSuperadminRoute
   '/admin/login': typeof AdminLoginRoute
   '/product/$id': typeof ProductIdRoute
   '/store/$slug/cart': typeof StoreSlugCartRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/shop': typeof ShopRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/superadmin': typeof AuthenticatedSuperadminRoute
   '/admin_/login': typeof AdminLoginRoute
   '/product/$id': typeof ProductIdRoute
   '/store/$slug': typeof StoreSlugRouteWithChildren
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/shop'
     | '/admin'
+    | '/superadmin'
     | '/admin/login'
     | '/product/$id'
     | '/store/$slug'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/shop'
     | '/admin'
+    | '/superadmin'
     | '/admin/login'
     | '/product/$id'
     | '/store/$slug/cart'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/shop'
     | '/_authenticated/admin'
+    | '/_authenticated/superadmin'
     | '/admin_/login'
     | '/product/$id'
     | '/store/$slug'
@@ -310,6 +322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/superadmin': {
+      id: '/_authenticated/superadmin'
+      path: '/superadmin'
+      fullPath: '/superadmin'
+      preLoaderRoute: typeof AuthenticatedSuperadminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -364,11 +383,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedSuperadminRoute: typeof AuthenticatedSuperadminRoute
   AuthenticatedStoreSlugAdminRoute: typeof AuthenticatedStoreSlugAdminRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedSuperadminRoute: AuthenticatedSuperadminRoute,
   AuthenticatedStoreSlugAdminRoute: AuthenticatedStoreSlugAdminRoute,
 }
 
