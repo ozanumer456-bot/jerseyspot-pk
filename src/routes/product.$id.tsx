@@ -54,7 +54,7 @@ export function ProductBody({ id }: { id: string }) {
     <SiteLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="text-sm text-muted-foreground mb-4">
-          <Link to="/" className="hover:text-primary">Home</Link> / <Link to="/shop" className="hover:text-primary">Shop</Link> / <span>{product.name}</span>
+          <Link to={sp("/") as any} className="hover:text-primary">Home</Link> / <Link to={sp("/shop") as any} className="hover:text-primary">Shop</Link> / <span>{product.name}</span>
         </div>
 
         <div className="grid md:grid-cols-2 gap-10">
