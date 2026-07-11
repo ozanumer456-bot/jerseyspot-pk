@@ -27,6 +27,7 @@ export function ProductBody({ id }: { id: string }) {
   const navigate = useNavigate();
   const add = useCart((s) => s.add);
   const wish = useWishlist();
+  const sp = useStorePath();
   const [size, setSize] = useState<string>("");
   const [qty, setQty] = useState(1);
 
