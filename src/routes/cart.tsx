@@ -65,7 +65,7 @@ export function CartBody() {
               </div>
               <Separator className="my-4" />
               <div className="flex justify-between font-display text-xl"><span>Total</span><span className="text-primary">{formatPKR(total)}</span></div>
-              <Link to="/checkout"><Button size="lg" className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90">Checkout <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
+              <Link to={sp("/checkout") as any}><Button size="lg" className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90">Checkout <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
             </Card>
           </div>
         )}
