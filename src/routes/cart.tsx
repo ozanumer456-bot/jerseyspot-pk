@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/store/cart";
 import { formatPKR } from "@/lib/products";
 import { useSettings } from "@/lib/settings";
+import { useStorePath } from "@/lib/store-context";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({ meta: [{ title: "Your Cart — KitVerse" }] }),
