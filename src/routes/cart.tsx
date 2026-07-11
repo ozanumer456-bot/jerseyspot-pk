@@ -17,6 +17,7 @@ export const Route = createFileRoute("/cart")({
 export function CartBody() {
   const { items, updateQty, remove, subtotal } = useCart();
   const { settings } = useSettings();
+  const sp = useStorePath();
   const sub = subtotal();
   const estShipping = settings.other_city_shipping;
   const shipping = sub === 0 || sub >= settings.free_shipping_above ? 0 : estShipping;
