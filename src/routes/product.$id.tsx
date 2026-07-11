@@ -14,11 +14,13 @@ import { useWishlist } from "@/store/wishlist";
 import { onImgError } from "@/lib/img-fallback";
 
 export const Route = createFileRoute("/product/$id")({
-  component: ProductBody,
+  component: () => {
+    const { id } = Route.useParams();
+    return <ProductBody id={id} />;
+  },
 });
 
-export function ProductBody() {
-  const { id } = Route.useParams();
+export function ProductBody({ id }: { id: string }) {
   const { data: product, isLoading } = useProduct(id);
   const { data: all = [] } = useProducts();
   const navigate = useNavigate();
