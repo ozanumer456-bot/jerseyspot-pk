@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram, MessageCircle, Mail } from "lucide-react";
 import { useSettings, waLink } from "@/lib/settings";
+import { useStorePath } from "@/lib/store-context";
 
 export function Footer() {
   const { settings } = useSettings();
+  const sp = useStorePath();
   return (
     <footer className="mt-24 border-t border-border bg-card/40">
       <div className="container mx-auto px-4 py-12 grid gap-8 md:grid-cols-4">
