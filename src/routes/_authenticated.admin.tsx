@@ -60,7 +60,7 @@ export function AdminBody() {
 
   const logout = async () => {
     await signOut();
-    navigate({ to: "/admin/login" });
+    navigate({ to: "/auth" });
   };
 
   return (

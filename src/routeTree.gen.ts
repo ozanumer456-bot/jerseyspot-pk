@@ -19,7 +19,6 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StoreSlugRouteImport } from './routes/store.$slug'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
-import { Route as AdminLoginRouteImport } from './routes/admin_.login'
 import { Route as AuthenticatedSuperadminRouteImport } from './routes/_authenticated.superadmin'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as StoreSlugIndexRouteImport } from './routes/store.$slug.index'
@@ -78,11 +77,6 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin_/login',
-  path: '/admin/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedSuperadminRoute = AuthenticatedSuperadminRouteImport.update({
   id: '/superadmin',
   path: '/superadmin',
@@ -135,7 +129,6 @@ export interface FileRoutesByFullPath {
   '/shop': typeof ShopRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/superadmin': typeof AuthenticatedSuperadminRoute
-  '/admin/login': typeof AdminLoginRoute
   '/product/$id': typeof ProductIdRoute
   '/store/$slug': typeof StoreSlugRouteWithChildren
   '/store/$slug/cart': typeof StoreSlugCartRoute
@@ -155,7 +148,6 @@ export interface FileRoutesByTo {
   '/shop': typeof ShopRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/superadmin': typeof AuthenticatedSuperadminRoute
-  '/admin/login': typeof AdminLoginRoute
   '/product/$id': typeof ProductIdRoute
   '/store/$slug/cart': typeof StoreSlugCartRoute
   '/store/$slug/checkout': typeof StoreSlugCheckoutRoute
@@ -176,7 +168,6 @@ export interface FileRoutesById {
   '/shop': typeof ShopRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/superadmin': typeof AuthenticatedSuperadminRoute
-  '/admin_/login': typeof AdminLoginRoute
   '/product/$id': typeof ProductIdRoute
   '/store/$slug': typeof StoreSlugRouteWithChildren
   '/store/$slug/cart': typeof StoreSlugCartRoute
@@ -198,7 +189,6 @@ export interface FileRouteTypes {
     | '/shop'
     | '/admin'
     | '/superadmin'
-    | '/admin/login'
     | '/product/$id'
     | '/store/$slug'
     | '/store/$slug/cart'
@@ -218,7 +208,6 @@ export interface FileRouteTypes {
     | '/shop'
     | '/admin'
     | '/superadmin'
-    | '/admin/login'
     | '/product/$id'
     | '/store/$slug/cart'
     | '/store/$slug/checkout'
@@ -238,7 +227,6 @@ export interface FileRouteTypes {
     | '/shop'
     | '/_authenticated/admin'
     | '/_authenticated/superadmin'
-    | '/admin_/login'
     | '/product/$id'
     | '/store/$slug'
     | '/store/$slug/cart'
@@ -258,7 +246,6 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   ShopRoute: typeof ShopRoute
-  AdminLoginRoute: typeof AdminLoginRoute
   ProductIdRoute: typeof ProductIdRoute
   StoreSlugRoute: typeof StoreSlugRouteWithChildren
 }
@@ -333,13 +320,6 @@ declare module '@tanstack/react-router' {
       path: '/product/$id'
       fullPath: '/product/$id'
       preLoaderRoute: typeof ProductIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin_/login': {
-      id: '/admin_/login'
-      path: '/admin/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/superadmin': {
@@ -446,7 +426,6 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   ShopRoute: ShopRoute,
-  AdminLoginRoute: AdminLoginRoute,
   ProductIdRoute: ProductIdRoute,
   StoreSlugRoute: StoreSlugRouteWithChildren,
 }
