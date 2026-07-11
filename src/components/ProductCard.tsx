@@ -8,17 +8,23 @@ import { formatPKR, type Product } from "@/lib/products";
 import { useCart } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
 import { onImgError } from "@/lib/img-fallback";
+import { useStoreSlug, DEFAULT_STORE_SLUG } from "@/lib/store-context";
 
 export function ProductCard({ p }: { p: Product }) {
   const add = useCart((s) => s.add);
   const wish = useWishlist();
+  const slug = useStoreSlug();
   const onSale = !!(p.salePrice && p.salePrice < p.price);
   const outOfStock = p.stock <= 0;
   const liked = wish.ids.includes(p.id);
+  const productLink: any =
+    slug === DEFAULT_STORE_SLUG
+      ? { to: "/product/$id", params: { id: p.id } }
+      : { to: "/store/$slug/product/$id", params: { slug, id: p.id } };
 
   return (
     <Card className="group relative overflow-hidden bg-card border-border hover:border-primary/60 transition-all hover:-translate-y-1 hover:glow-green p-0">
-      <Link to="/product/$id" params={{ id: p.id }} className="block">
+      <Link {...productLink} className="block">
         <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
           <img src={p.image} alt={p.name} loading="lazy" onError={onImgError} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
           <div className="absolute top-3 left-3 flex flex-col gap-1">
@@ -36,7 +42,7 @@ export function ProductCard({ p }: { p: Product }) {
       </Link>
       <div className="p-4 space-y-2">
         <div className="text-xs text-muted-foreground uppercase tracking-wide">{p.team}</div>
-        <Link to="/product/$id" params={{ id: p.id }} className="block">
+        <Link {...productLink} className="block">
           <h3 className="font-display text-lg leading-tight hover:text-primary transition-colors">{p.name}</h3>
         </Link>
         <div className="flex items-center gap-1">

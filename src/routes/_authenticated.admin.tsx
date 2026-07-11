@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, signOut } from "@/lib/auth";
 import { formatPKR, type Product, mapProduct, type DbProduct } from "@/lib/products";
 import { useSettings, type Settings as Stg } from "@/lib/settings";
+import { useCurrentStore } from "@/lib/store-context";
 import { downloadInvoice, openInvoicePreview, invoiceWhatsAppLink, invoiceNumber, type InvoiceOrder } from "@/lib/invoice";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -60,7 +61,7 @@ export function AdminBody() {
 
   const logout = async () => {
     await signOut();
-    navigate({ to: "/admin/login" });
+    navigate({ to: "/auth" });
   };
 
   return (
@@ -102,10 +103,12 @@ export function AdminBody() {
 }
 
 function useOrders() {
+  const { storeId } = useCurrentStore();
   return useQuery({
-    queryKey: ["orders"],
+    queryKey: ["orders", storeId],
+    enabled: !!storeId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("orders" as any).select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("orders" as any).select("*").eq("store_id", storeId!).order("created_at", { ascending: false });
       if (error) throw error;
       return (data as unknown as Order[]) ?? [];
     },
@@ -113,10 +116,12 @@ function useOrders() {
 }
 
 function useAdminProducts() {
+  const { storeId } = useCurrentStore();
   return useQuery({
-    queryKey: ["products"],
+    queryKey: ["products", storeId],
+    enabled: !!storeId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("products" as any).select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("products" as any).select("*").eq("store_id", storeId!).order("created_at", { ascending: false });
       if (error) throw error;
       return ((data as unknown as DbProduct[]) ?? []).map(mapProduct);
     },
@@ -124,15 +129,18 @@ function useAdminProducts() {
 }
 
 function useCustomers() {
+  const { storeId } = useCurrentStore();
   return useQuery({
-    queryKey: ["customers"],
+    queryKey: ["customers", storeId],
+    enabled: !!storeId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("customers" as any).select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("customers" as any).select("*").eq("store_id", storeId!).order("created_at", { ascending: false });
       if (error) throw error;
       return (data as unknown as { id: string; name: string; phone: string; city: string; total_orders: number; total_spent: number }[]) ?? [];
     },
   });
 }
+
 
 function Dashboard() {
   const { data: orders = [] } = useOrders();
@@ -189,6 +197,7 @@ type ProductFormState = {
 
 function ProductForm({ initial, onClose }: { initial?: Product; onClose: () => void }) {
   const qc = useQueryClient();
+  const { storeId } = useCurrentStore();
   const [busy, setBusy] = useState(false);
   const [p, setP] = useState<ProductFormState>(initial ? {
     id: initial.id, name: initial.name, team: initial.team, category: initial.category, type: initial.type,
@@ -203,6 +212,7 @@ function ProductForm({ initial, onClose }: { initial?: Product; onClose: () => v
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!storeId) { toast.error("Store not loaded"); return; }
     setBusy(true);
     try {
       const payload = {
@@ -215,11 +225,11 @@ function ProductForm({ initial, onClose }: { initial?: Product; onClose: () => v
         const { error } = await supabase.from("products" as any).update(payload).eq("id", p.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("products" as any).insert(payload);
+        const { error } = await supabase.from("products" as any).insert({ ...payload, store_id: storeId });
         if (error) throw error;
       }
       toast.success("Saved");
-      qc.invalidateQueries({ queryKey: ["products"] });
+      qc.invalidateQueries({ queryKey: ["products", storeId] });
       onClose();
     } catch (err: any) {
       toast.error(err.message);
@@ -620,6 +630,7 @@ function Customers() {
 
 function SettingsTab() {
   const { settings, isLoading } = useSettings();
+  const { slug } = useCurrentStore();
   const qc = useQueryClient();
   const [form, setForm] = useState<Stg>(settings);
   const [busy, setBusy] = useState(false);
@@ -629,7 +640,7 @@ function SettingsTab() {
   const save = async () => {
     setBusy(true);
     try {
-      const { error } = await supabase.from("settings" as any).update({
+      const { error } = await supabase.from("stores" as any).update({
         store_name: form.store_name,
         tagline: form.tagline,
         primary_color: form.primary_color,
@@ -643,12 +654,12 @@ function SettingsTab() {
         instagram_url: form.instagram_url,
         facebook_url: form.facebook_url,
         free_shipping_above: form.free_shipping_above,
-        shipping_cost: form.shipping_cost,
         karachi_shipping: form.karachi_shipping,
         other_city_shipping: form.other_city_shipping,
-      }).eq("id", form.id);
+      }).eq("store_slug", slug);
       if (error) throw error;
-      qc.invalidateQueries({ queryKey: ["settings"] });
+      qc.invalidateQueries({ queryKey: ["store", slug] });
+      qc.invalidateQueries({ queryKey: ["all-stores"] });
       toast.success("Settings saved — changes are live");
     } catch (err: any) {
       toast.error(err.message);
@@ -656,6 +667,7 @@ function SettingsTab() {
       setBusy(false);
     }
   };
+
 
   if (isLoading) return <Card className="p-10 text-center bg-card border-border"><Loader2 className="inline animate-spin h-6 w-6 text-primary" /></Card>;
 

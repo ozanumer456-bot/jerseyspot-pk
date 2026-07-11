@@ -12,18 +12,22 @@ import { formatPKR, useProduct, useProducts } from "@/lib/products";
 import { useCart } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
 import { onImgError } from "@/lib/img-fallback";
+import { useStorePath } from "@/lib/store-context";
 
 export const Route = createFileRoute("/product/$id")({
-  component: ProductBody,
+  component: () => {
+    const { id } = Route.useParams();
+    return <ProductBody id={id} />;
+  },
 });
 
-export function ProductBody() {
-  const { id } = Route.useParams();
+export function ProductBody({ id }: { id: string }) {
   const { data: product, isLoading } = useProduct(id);
   const { data: all = [] } = useProducts();
   const navigate = useNavigate();
   const add = useCart((s) => s.add);
   const wish = useWishlist();
+  const sp = useStorePath();
   const [size, setSize] = useState<string>("");
   const [qty, setQty] = useState(1);
 
@@ -31,7 +35,7 @@ export function ProductBody() {
     return <SiteLayout><div className="container mx-auto px-4 py-20 text-center"><Loader2 className="inline animate-spin h-6 w-6 text-primary" /></div></SiteLayout>;
   }
   if (!product) {
-    return <SiteLayout><div className="container mx-auto px-4 py-20 text-center"><h1 className="font-display text-3xl">Product not found</h1><Link to="/shop" className="text-primary underline mt-4 inline-block">Back to shop</Link></div></SiteLayout>;
+    return <SiteLayout><div className="container mx-auto px-4 py-20 text-center"><h1 className="font-display text-3xl">Product not found</h1><Link to={sp("/shop") as any} className="text-primary underline mt-4 inline-block">Back to shop</Link></div></SiteLayout>;
   }
 
   const activeSize = size || product.sizes[0] || "M";
@@ -43,14 +47,14 @@ export function ProductBody() {
     if (outOfStock) return;
     add({ productId: product.id, name: product.name, image: product.image, price, size: activeSize, quantity: qty });
     toast.success(`${product.name} (${activeSize}) × ${qty} added`);
-    if (buyNow) navigate({ to: "/cart" });
+    if (buyNow) navigate({ to: sp("/cart") as any });
   };
 
   return (
     <SiteLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="text-sm text-muted-foreground mb-4">
-          <Link to="/" className="hover:text-primary">Home</Link> / <Link to="/shop" className="hover:text-primary">Shop</Link> / <span>{product.name}</span>
+          <Link to={sp("/") as any} className="hover:text-primary">Home</Link> / <Link to={sp("/shop") as any} className="hover:text-primary">Shop</Link> / <span>{product.name}</span>
         </div>
 
         <div className="grid md:grid-cols-2 gap-10">

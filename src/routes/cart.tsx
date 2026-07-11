@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/store/cart";
 import { formatPKR } from "@/lib/products";
 import { useSettings } from "@/lib/settings";
+import { useStorePath } from "@/lib/store-context";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({ meta: [{ title: "Your Cart — KitVerse" }] }),
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/cart")({
 export function CartBody() {
   const { items, updateQty, remove, subtotal } = useCart();
   const { settings } = useSettings();
+  const sp = useStorePath();
   const sub = subtotal();
   const estShipping = settings.other_city_shipping;
   const shipping = sub === 0 || sub >= settings.free_shipping_above ? 0 : estShipping;
@@ -28,7 +30,7 @@ export function CartBody() {
         {items.length === 0 ? (
           <div className="py-20 text-center">
             <p className="text-muted-foreground">Your cart is empty.</p>
-            <Link to="/shop"><Button className="mt-4 bg-primary text-primary-foreground">Shop Jerseys</Button></Link>
+            <Link to={sp("/shop") as any}><Button className="mt-4 bg-primary text-primary-foreground">Shop Jerseys</Button></Link>
           </div>
         ) : (
           <div className="grid lg:grid-cols-[1fr_360px] gap-8">
@@ -63,7 +65,7 @@ export function CartBody() {
               </div>
               <Separator className="my-4" />
               <div className="flex justify-between font-display text-xl"><span>Total</span><span className="text-primary">{formatPKR(total)}</span></div>
-              <Link to="/checkout"><Button size="lg" className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90">Checkout <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
+              <Link to={sp("/checkout") as any}><Button size="lg" className="w-full mt-5 bg-primary text-primary-foreground hover:bg-primary/90">Checkout <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
             </Card>
           </div>
         )}

@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram, MessageCircle, Mail } from "lucide-react";
 import { useSettings, waLink } from "@/lib/settings";
+import { useStorePath } from "@/lib/store-context";
 
 export function Footer() {
   const { settings } = useSettings();
+  const sp = useStorePath();
   return (
     <footer className="mt-24 border-t border-border bg-card/40">
       <div className="container mx-auto px-4 py-12 grid gap-8 md:grid-cols-4">
@@ -17,18 +19,18 @@ export function Footer() {
         <div>
           <h4 className="font-display text-lg mb-3">Shop</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/shop" className="hover:text-primary">All Jerseys</Link></li>
-            <li><Link to="/shop" search={{ category: "club" } as any} className="hover:text-primary">Club Jerseys</Link></li>
-            <li><Link to="/shop" search={{ category: "national" } as any} className="hover:text-primary">National Team</Link></li>
-            <li><Link to="/shop" search={{ category: "retro" } as any} className="hover:text-primary">Retro</Link></li>
-            <li><Link to="/shop" search={{ category: "training" } as any} className="hover:text-primary">Training</Link></li>
+            <li><Link to={sp("/shop") as any} className="hover:text-primary">All Jerseys</Link></li>
+            <li><Link to={sp("/shop") as any} search={{ category: "club" } as any} className="hover:text-primary">Club Jerseys</Link></li>
+            <li><Link to={sp("/shop") as any} search={{ category: "national" } as any} className="hover:text-primary">National Team</Link></li>
+            <li><Link to={sp("/shop") as any} search={{ category: "retro" } as any} className="hover:text-primary">Retro</Link></li>
+            <li><Link to={sp("/shop") as any} search={{ category: "training" } as any} className="hover:text-primary">Training</Link></li>
           </ul>
         </div>
         <div>
           <h4 className="font-display text-lg mb-3">Help</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/about" className="hover:text-primary">About Us</Link></li>
-            <li><Link to="/contact" className="hover:text-primary">Contact</Link></li>
+            <li><Link to={sp("/about") as any} className="hover:text-primary">About Us</Link></li>
+            <li><Link to={sp("/contact") as any} className="hover:text-primary">Contact</Link></li>
             <li>Shipping Info</li>
             <li>Returns</li>
           </ul>
