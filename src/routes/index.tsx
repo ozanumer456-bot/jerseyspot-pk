@@ -9,6 +9,7 @@ import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { useProducts } from "@/lib/products";
 import { useSettings } from "@/lib/settings";
+import { useStorePath } from "@/lib/store-context";
 
 export const Route = createFileRoute("/")({
   head: () => ({
