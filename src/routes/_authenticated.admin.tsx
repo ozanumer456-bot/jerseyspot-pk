@@ -197,6 +197,7 @@ type ProductFormState = {
 
 function ProductForm({ initial, onClose }: { initial?: Product; onClose: () => void }) {
   const qc = useQueryClient();
+  const { storeId } = useCurrentStore();
   const [busy, setBusy] = useState(false);
   const [p, setP] = useState<ProductFormState>(initial ? {
     id: initial.id, name: initial.name, team: initial.team, category: initial.category, type: initial.type,
@@ -211,6 +212,7 @@ function ProductForm({ initial, onClose }: { initial?: Product; onClose: () => v
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!storeId) { toast.error("Store not loaded"); return; }
     setBusy(true);
     try {
       const payload = {
@@ -223,11 +225,11 @@ function ProductForm({ initial, onClose }: { initial?: Product; onClose: () => v
         const { error } = await supabase.from("products" as any).update(payload).eq("id", p.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("products" as any).insert(payload);
+        const { error } = await supabase.from("products" as any).insert({ ...payload, store_id: storeId });
         if (error) throw error;
       }
       toast.success("Saved");
-      qc.invalidateQueries({ queryKey: ["products"] });
+      qc.invalidateQueries({ queryKey: ["products", storeId] });
       onClose();
     } catch (err: any) {
       toast.error(err.message);
