@@ -47,7 +47,7 @@ export function ProductBody({ id }: { id: string }) {
     if (outOfStock) return;
     add({ productId: product.id, name: product.name, image: product.image, price, size: activeSize, quantity: qty });
     toast.success(`${product.name} (${activeSize}) × ${qty} added`);
-    if (buyNow) navigate({ to: "/cart" });
+    if (buyNow) navigate({ to: sp("/cart") as any });
   };
 
   return (
