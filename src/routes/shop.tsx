@@ -69,8 +69,7 @@ function Filters({ allTeams, teams, setTeams, sizes, setSizes, types, setTypes, 
   );
 }
 
-export function ShopBody() {
-  const { q, category } = Route.useSearch();
+export function ShopBody({ q = "", category = "" }: { q?: string; category?: string } = {}) {
   const [search, setSearch] = useState(q);
   const [teams, setTeams] = useState<string[]>([]);
   const [sizes, setSizes] = useState<string[]>([]);
