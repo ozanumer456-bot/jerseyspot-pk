@@ -67,6 +67,7 @@ const testimonials = [
 export function HomeBody() {
   const { data: all = [], isLoading } = useProducts();
   const { settings } = useSettings();
+  const sp = useStorePath();
   const featured = all.slice(0, 8);
   const heroImg = settings.hero_image_url || pakistanJersey.url;
   return (
