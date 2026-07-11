@@ -21,6 +21,7 @@ import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as AdminLoginRouteImport } from './routes/admin_.login'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as StoreSlugIndexRouteImport } from './routes/store.$slug.index'
+import { Route as StoreSlugShopRouteImport } from './routes/store.$slug.shop'
 
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
@@ -81,6 +82,11 @@ const StoreSlugIndexRoute = StoreSlugIndexRouteImport.update({
   path: '/',
   getParentRoute: () => StoreSlugRoute,
 } as any)
+const StoreSlugShopRoute = StoreSlugShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => StoreSlugRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/product/$id': typeof ProductIdRoute
   '/store/$slug': typeof StoreSlugRouteWithChildren
+  '/store/$slug/shop': typeof StoreSlugShopRoute
   '/store/$slug/': typeof StoreSlugIndexRoute
 }
 export interface FileRoutesByTo {
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/admin/login': typeof AdminLoginRoute
   '/product/$id': typeof ProductIdRoute
+  '/store/$slug/shop': typeof StoreSlugShopRoute
   '/store/$slug': typeof StoreSlugIndexRoute
 }
 export interface FileRoutesById {
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/admin_/login': typeof AdminLoginRoute
   '/product/$id': typeof ProductIdRoute
   '/store/$slug': typeof StoreSlugRouteWithChildren
+  '/store/$slug/shop': typeof StoreSlugShopRoute
   '/store/$slug/': typeof StoreSlugIndexRoute
 }
 export interface FileRouteTypes {
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/product/$id'
     | '/store/$slug'
+    | '/store/$slug/shop'
     | '/store/$slug/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/login'
     | '/product/$id'
+    | '/store/$slug/shop'
     | '/store/$slug'
   id:
     | '__root__'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/admin_/login'
     | '/product/$id'
     | '/store/$slug'
+    | '/store/$slug/shop'
     | '/store/$slug/'
   fileRoutesById: FileRoutesById
 }
@@ -263,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoreSlugIndexRouteImport
       parentRoute: typeof StoreSlugRoute
     }
+    '/store/$slug/shop': {
+      id: '/store/$slug/shop'
+      path: '/shop'
+      fullPath: '/store/$slug/shop'
+      preLoaderRoute: typeof StoreSlugShopRouteImport
+      parentRoute: typeof StoreSlugRoute
+    }
   }
 }
 
@@ -279,10 +298,12 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 interface StoreSlugRouteChildren {
+  StoreSlugShopRoute: typeof StoreSlugShopRoute
   StoreSlugIndexRoute: typeof StoreSlugIndexRoute
 }
 
 const StoreSlugRouteChildren: StoreSlugRouteChildren = {
+  StoreSlugShopRoute: StoreSlugShopRoute,
   StoreSlugIndexRoute: StoreSlugIndexRoute,
 }
 
