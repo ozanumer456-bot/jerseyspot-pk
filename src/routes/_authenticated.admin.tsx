@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, signOut } from "@/lib/auth";
 import { formatPKR, type Product, mapProduct, type DbProduct } from "@/lib/products";
 import { useSettings, type Settings as Stg } from "@/lib/settings";
+import { useCurrentStore } from "@/lib/store-context";
 import { downloadInvoice, openInvoicePreview, invoiceWhatsAppLink, invoiceNumber, type InvoiceOrder } from "@/lib/invoice";
 
 export const Route = createFileRoute("/_authenticated/admin")({
