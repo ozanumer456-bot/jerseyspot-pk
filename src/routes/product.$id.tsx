@@ -35,7 +35,7 @@ export function ProductBody({ id }: { id: string }) {
     return <SiteLayout><div className="container mx-auto px-4 py-20 text-center"><Loader2 className="inline animate-spin h-6 w-6 text-primary" /></div></SiteLayout>;
   }
   if (!product) {
-    return <SiteLayout><div className="container mx-auto px-4 py-20 text-center"><h1 className="font-display text-3xl">Product not found</h1><Link to="/shop" className="text-primary underline mt-4 inline-block">Back to shop</Link></div></SiteLayout>;
+    return <SiteLayout><div className="container mx-auto px-4 py-20 text-center"><h1 className="font-display text-3xl">Product not found</h1><Link to={sp("/shop") as any} className="text-primary underline mt-4 inline-block">Back to shop</Link></div></SiteLayout>;
   }
 
   const activeSize = size || product.sizes[0] || "M";
