@@ -85,12 +85,12 @@ export function HomeBody() {
               {settings.hero_subheading}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/shop">
+              <Link to={sp("/shop") as any}>
                 <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-green">
                   Shop Now <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Link to="/shop">
+              <Link to={sp("/shop") as any}>
                 <Button size="lg" variant="outline" className="border-border">View Collection</Button>
               </Link>
             </div>
@@ -125,7 +125,7 @@ export function HomeBody() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {categories.map((c) => (
-            <Link key={c.name} to="/shop" className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-border hover:border-primary transition">
+            <Link key={c.name} to={sp("/shop") as any} className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-border hover:border-primary transition">
               <img src={c.img} alt={c.name} onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=400&fit=crop"; }} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
               <div className="absolute bottom-0 p-4">
@@ -144,7 +144,7 @@ export function HomeBody() {
             <h2 className="font-display text-4xl">Featured Jerseys</h2>
             <p className="text-muted-foreground mt-1">Top picks for this season</p>
           </div>
-          <Link to="/shop" className="text-primary hover:underline text-sm font-semibold">View all →</Link>
+          <Link to={sp("/shop") as any} className="text-primary hover:underline text-sm font-semibold">View all →</Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {isLoading && featured.length === 0
@@ -166,7 +166,7 @@ export function HomeBody() {
           <h2 className="font-display text-4xl md:text-5xl mt-3">Up to 30% OFF — Limited Time!</h2>
           <p className="text-muted-foreground mt-2 max-w-xl">Hurry! Selected jerseys at slashed prices. Sale ends soon.</p>
           <div className="mt-6"><Countdown /></div>
-          <Link to="/shop"><Button size="lg" className="mt-6 bg-primary text-primary-foreground">Grab Deals <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
+          <Link to={sp("/shop") as any}><Button size="lg" className="mt-6 bg-primary text-primary-foreground">Grab Deals <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
         </Card>
       </section>
 
