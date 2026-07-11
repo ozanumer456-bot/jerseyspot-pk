@@ -8,13 +8,19 @@ import { formatPKR, type Product } from "@/lib/products";
 import { useCart } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
 import { onImgError } from "@/lib/img-fallback";
+import { useStoreSlug, DEFAULT_STORE_SLUG } from "@/lib/store-context";
 
 export function ProductCard({ p }: { p: Product }) {
   const add = useCart((s) => s.add);
   const wish = useWishlist();
+  const slug = useStoreSlug();
   const onSale = !!(p.salePrice && p.salePrice < p.price);
   const outOfStock = p.stock <= 0;
   const liked = wish.ids.includes(p.id);
+  const productLink: any =
+    slug === DEFAULT_STORE_SLUG
+      ? { to: "/product/$id", params: { id: p.id } }
+      : { to: "/store/$slug/product/$id", params: { slug, id: p.id } };
 
   return (
     <Card className="group relative overflow-hidden bg-card border-border hover:border-primary/60 transition-all hover:-translate-y-1 hover:glow-green p-0">
