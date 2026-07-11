@@ -621,6 +621,7 @@ function Customers() {
 
 function SettingsTab() {
   const { settings, isLoading } = useSettings();
+  const { slug } = useCurrentStore();
   const qc = useQueryClient();
   const [form, setForm] = useState<Stg>(settings);
   const [busy, setBusy] = useState(false);
@@ -630,7 +631,7 @@ function SettingsTab() {
   const save = async () => {
     setBusy(true);
     try {
-      const { error } = await supabase.from("settings" as any).update({
+      const { error } = await supabase.from("stores" as any).update({
         store_name: form.store_name,
         tagline: form.tagline,
         primary_color: form.primary_color,
@@ -644,12 +645,12 @@ function SettingsTab() {
         instagram_url: form.instagram_url,
         facebook_url: form.facebook_url,
         free_shipping_above: form.free_shipping_above,
-        shipping_cost: form.shipping_cost,
         karachi_shipping: form.karachi_shipping,
         other_city_shipping: form.other_city_shipping,
-      }).eq("id", form.id);
+      }).eq("store_slug", slug);
       if (error) throw error;
-      qc.invalidateQueries({ queryKey: ["settings"] });
+      qc.invalidateQueries({ queryKey: ["store", slug] });
+      qc.invalidateQueries({ queryKey: ["all-stores"] });
       toast.success("Settings saved — changes are live");
     } catch (err: any) {
       toast.error(err.message);
@@ -657,6 +658,7 @@ function SettingsTab() {
       setBusy(false);
     }
   };
+
 
   if (isLoading) return <Card className="p-10 text-center bg-card border-border"><Loader2 className="inline animate-spin h-6 w-6 text-primary" /></Card>;
 
