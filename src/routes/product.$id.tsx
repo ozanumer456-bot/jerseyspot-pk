@@ -12,6 +12,7 @@ import { formatPKR, useProduct, useProducts } from "@/lib/products";
 import { useCart } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
 import { onImgError } from "@/lib/img-fallback";
+import { useStorePath } from "@/lib/store-context";
 
 export const Route = createFileRoute("/product/$id")({
   component: () => {
