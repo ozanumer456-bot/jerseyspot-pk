@@ -103,10 +103,12 @@ export function AdminBody() {
 }
 
 function useOrders() {
+  const { storeId } = useCurrentStore();
   return useQuery({
-    queryKey: ["orders"],
+    queryKey: ["orders", storeId],
+    enabled: !!storeId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("orders" as any).select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("orders" as any).select("*").eq("store_id", storeId!).order("created_at", { ascending: false });
       if (error) throw error;
       return (data as unknown as Order[]) ?? [];
     },
@@ -114,10 +116,12 @@ function useOrders() {
 }
 
 function useAdminProducts() {
+  const { storeId } = useCurrentStore();
   return useQuery({
-    queryKey: ["products"],
+    queryKey: ["products", storeId],
+    enabled: !!storeId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("products" as any).select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("products" as any).select("*").eq("store_id", storeId!).order("created_at", { ascending: false });
       if (error) throw error;
       return ((data as unknown as DbProduct[]) ?? []).map(mapProduct);
     },
@@ -125,15 +129,18 @@ function useAdminProducts() {
 }
 
 function useCustomers() {
+  const { storeId } = useCurrentStore();
   return useQuery({
-    queryKey: ["customers"],
+    queryKey: ["customers", storeId],
+    enabled: !!storeId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("customers" as any).select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("customers" as any).select("*").eq("store_id", storeId!).order("created_at", { ascending: false });
       if (error) throw error;
       return (data as unknown as { id: string; name: string; phone: string; city: string; total_orders: number; total_spent: number }[]) ?? [];
     },
   });
 }
+
 
 function Dashboard() {
   const { data: orders = [] } = useOrders();
