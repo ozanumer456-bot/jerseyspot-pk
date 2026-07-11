@@ -30,7 +30,7 @@ export function CartBody() {
         {items.length === 0 ? (
           <div className="py-20 text-center">
             <p className="text-muted-foreground">Your cart is empty.</p>
-            <Link to="/shop"><Button className="mt-4 bg-primary text-primary-foreground">Shop Jerseys</Button></Link>
+            <Link to={sp("/shop") as any}><Button className="mt-4 bg-primary text-primary-foreground">Shop Jerseys</Button></Link>
           </div>
         ) : (
           <div className="grid lg:grid-cols-[1fr_360px] gap-8">
