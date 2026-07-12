@@ -51,12 +51,7 @@ function Countdown() {
 }
 
 
-const categories = [
-  { name: "Club Jerseys", img: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=400&fit=crop", to: "Club" },
-  { name: "National Team", img: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&h=400&fit=crop", to: "National" },
-  { name: "Retro/Vintage", img: "https://images.unsplash.com/photo-1547347298-4074fc3086f0?w=600&h=400&fit=crop", to: "Retro" },
-  { name: "Training Kits", img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=400&fit=crop", to: "Training" },
-];
+const FALLBACK_CATEGORY_IMG = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=400&fit=crop";
 
 const testimonials = [
   { name: "Ali Raza", city: "Karachi", text: "The quality is outstanding! My Real Madrid jersey looks completely original, and delivery was very fast.", rating: 5 },
