@@ -119,16 +119,22 @@ export function HomeBody() {
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {categories.map((c) => (
-            <Link key={c.name} to={sp("/shop") as any} className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-border hover:border-primary transition">
-              <img src={c.img} alt={c.name} onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=400&fit=crop"; }} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
-              <div className="absolute bottom-0 p-4">
-                <h3 className="font-display text-2xl text-white">{c.name}</h3>
-                <span className="text-sm text-primary group-hover:underline">Explore →</span>
-              </div>
-            </Link>
-          ))}
+          {(() => {
+            const map = new Map<string, string>();
+            for (const p of all) if (p.category && !map.has(p.category)) map.set(p.category, p.image);
+            const cats = Array.from(map.entries()).slice(0, 4);
+            if (cats.length === 0) return null;
+            return cats.map(([name, img]) => (
+              <Link key={name} to={sp("/shop") as any} search={{ q: "", category: name } as any} className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-border hover:border-primary transition">
+                <img src={img || FALLBACK_CATEGORY_IMG} alt={name} onError={(e) => { e.currentTarget.src = FALLBACK_CATEGORY_IMG; }} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+                <div className="absolute bottom-0 p-4">
+                  <h3 className="font-display text-2xl text-white">{name}</h3>
+                  <span className="text-sm text-primary group-hover:underline">Explore →</span>
+                </div>
+              </Link>
+            ));
+          })()}
         </div>
       </section>
 
