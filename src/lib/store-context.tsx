@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -72,25 +72,59 @@ type Ctx = {
   store: StoreRow;
   storeId: string | null;
   loading: boolean;
+  refetch: () => Promise<unknown>;
 };
 
 const StoreCtx = createContext<Ctx | null>(null);
+
+const DEFAULT_CONTEXT: Ctx = {
+  slug: DEFAULT_STORE_SLUG,
+  store: FALLBACK_STORE,
+  storeId: null,
+  loading: false,
+  refetch: () => Promise.resolve(null),
+};
 
 export function StoreProvider({ slug, children }: { slug?: string; children: ReactNode }) {
   const effectiveSlug = slug || DEFAULT_STORE_SLUG;
   const q = useStoreQuery(effectiveSlug);
   const storeId = q.data?.id ?? null;
+  const refetch = useCallback(() => q.refetch(), [q.refetch]);
   const value = useMemo<Ctx>(() => {
     const store = q.data ?? { ...FALLBACK_STORE, store_slug: effectiveSlug };
-    return { slug: effectiveSlug, store, storeId, loading: q.isLoading };
-  }, [effectiveSlug, q.data, storeId, q.isLoading]);
+    return { slug: effectiveSlug, store, storeId, loading: q.isLoading, refetch };
+  }, [effectiveSlug, q.data, storeId, q.isLoading, refetch]);
+
+  const lastDebugValue = useRef<Ctx | null>(null);
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const previous = lastDebugValue.current;
+    const changed = previous
+      ? {
+          slug: previous.slug !== value.slug,
+          storeId: previous.storeId !== value.storeId,
+          loading: previous.loading !== value.loading,
+          storeRef: previous.store !== value.store,
+          refetchRef: previous.refetch !== value.refetch,
+        }
+      : "initial";
+    console.log("[StoreProvider] context value changed", {
+      changed,
+      slug: value.slug,
+      storeId: value.storeId,
+      loading: value.loading,
+      storeName: value.store.store_name,
+    });
+    lastDebugValue.current = value;
+  }, [value.slug, value.storeId, value.loading, value.store, value.refetch]);
+
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;
 }
 
 export function useCurrentStore(): Ctx {
   const c = useContext(StoreCtx);
   if (c) return c;
-  return { slug: DEFAULT_STORE_SLUG, store: FALLBACK_STORE, storeId: null, loading: false };
+  return DEFAULT_CONTEXT;
 }
 
 export function useStoreSlug() {
@@ -100,12 +134,12 @@ export function useStoreSlug() {
 /** Prepend the correct store prefix to a top-level path. Default store → path as-is. */
 export function useStorePath() {
   const slug = useStoreSlug();
-  return (path: string) => {
+  return useCallback((path: string) => {
     if (!path.startsWith("/")) path = "/" + path;
     if (slug === DEFAULT_STORE_SLUG) return path;
     if (path === "/") return `/store/${slug}`;
     return `/store/${slug}${path}`;
-  };
+  }, [slug]);
 }
 
 export function storePath(slug: string, path: string) {
