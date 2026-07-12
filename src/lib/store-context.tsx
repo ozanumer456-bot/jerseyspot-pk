@@ -79,12 +79,12 @@ const StoreCtx = createContext<Ctx | null>(null);
 export function StoreProvider({ slug, children }: { slug?: string; children: ReactNode }) {
   const effectiveSlug = slug || DEFAULT_STORE_SLUG;
   const q = useStoreQuery(effectiveSlug);
-  const store = q.data ?? { ...FALLBACK_STORE, store_slug: effectiveSlug };
-  return (
-    <StoreCtx.Provider value={{ slug: effectiveSlug, store, storeId: q.data?.id ?? null, loading: q.isLoading }}>
-      {children}
-    </StoreCtx.Provider>
-  );
+  const storeId = q.data?.id ?? null;
+  const value = useMemo<Ctx>(() => {
+    const store = q.data ?? { ...FALLBACK_STORE, store_slug: effectiveSlug };
+    return { slug: effectiveSlug, store, storeId, loading: q.isLoading };
+  }, [effectiveSlug, q.data, storeId, q.isLoading]);
+  return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;
 }
 
 export function useCurrentStore(): Ctx {
