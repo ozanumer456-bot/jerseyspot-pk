@@ -1,6 +1,7 @@
+import { useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentStore, useStoreQuery, DEFAULT_STORE_SLUG, FALLBACK_STORE, type StoreRow } from "./store-context";
+import { useCurrentStore, DEFAULT_STORE_SLUG, FALLBACK_STORE, type StoreRow } from "./store-context";
 
 export type Settings = StoreRow & {
   // Back-compat alias: some callers used `shipping_cost`; map to other_city_shipping.
@@ -18,10 +19,12 @@ export function shippingForCity(city: string, s: Pick<Settings, "karachi_shippin
  * Callers keep the previous shape.
  */
 export function useSettings() {
-  const { slug, store, loading } = useCurrentStore();
-  const q = useStoreQuery(slug);
-  const settings: Settings = (q.data ?? store) as Settings;
-  return { settings, isLoading: loading || q.isLoading, refetch: q.refetch };
+  const { store, loading, refetch } = useCurrentStore();
+  const settings = store as Settings;
+  return useMemo(
+    () => ({ settings, isLoading: loading, refetch }),
+    [settings, loading, refetch]
+  );
 }
 
 export const waLink = (phone: string, text: string) =>

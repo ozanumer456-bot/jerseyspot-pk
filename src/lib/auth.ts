@@ -1,27 +1,54 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
 export type AdminStore = { store_id: string; store_slug: string; store_name: string };
 
+type AuthState = {
+  user: User | null;
+  isAdmin: boolean;
+  isSuperadmin: boolean;
+  adminStores: AdminStore[];
+  loading: boolean;
+};
+
+const EMPTY_AUTH_STATE: AuthState = {
+  user: null,
+  isAdmin: false,
+  isSuperadmin: false,
+  adminStores: [],
+  loading: true,
+};
+
+function sameStores(a: AdminStore[], b: AdminStore[]) {
+  return a.length === b.length && a.every((store, i) => (
+    store.store_id === b[i]?.store_id &&
+    store.store_slug === b[i]?.store_slug &&
+    store.store_name === b[i]?.store_name
+  ));
+}
+
+function sameAuthState(a: AuthState, b: AuthState) {
+  return a.user?.id === b.user?.id &&
+    a.isAdmin === b.isAdmin &&
+    a.isSuperadmin === b.isSuperadmin &&
+    a.loading === b.loading &&
+    sameStores(a.adminStores, b.adminStores);
+}
+
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isSuperadmin, setIsSuperadmin] = useState(false);
-  const [adminStores, setAdminStores] = useState<AdminStore[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<AuthState>(EMPTY_AUTH_STATE);
 
   useEffect(() => {
     let active = true;
+    const commit = (next: AuthState) => {
+      if (!active) return;
+      setState((prev) => sameAuthState(prev, next) ? prev : next);
+    };
+
     const check = async (u: User | null) => {
       if (!u) {
-        if (active) {
-          setUser(null);
-          setIsAdmin(false);
-          setIsSuperadmin(false);
-          setAdminStores([]);
-          setLoading(false);
-        }
+        commit({ ...EMPTY_AUTH_STATE, loading: false });
         return;
       }
       const { data: roles } = await supabase
@@ -42,12 +69,13 @@ export function useAuth() {
         stores = ((data as any[]) ?? []).map((s) => ({ store_id: s.id, store_slug: s.store_slug, store_name: s.store_name }));
       }
 
-      if (!active) return;
-      setUser(u);
-      setIsSuperadmin(!!superRow);
-      setIsAdmin(!!superRow || adminRows.length > 0);
-      setAdminStores(stores);
-      setLoading(false);
+      commit({
+        user: u,
+        isSuperadmin: !!superRow,
+        isAdmin: !!superRow || adminRows.length > 0,
+        adminStores: stores,
+        loading: false,
+      });
     };
 
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
@@ -61,7 +89,7 @@ export function useAuth() {
     };
   }, []);
 
-  return { user, isAdmin, isSuperadmin, adminStores, loading };
+  return useMemo(() => state, [state]);
 }
 
 export const signOut = () => supabase.auth.signOut();

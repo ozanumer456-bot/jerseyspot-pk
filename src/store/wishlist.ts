@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useCallback, useMemo } from "react";
 import { useCurrentStore } from "@/lib/store-context";
 
 type Entry = { storeId: string; productId: string };
@@ -35,13 +36,13 @@ export type WishView = {
 export function useWishlist<T = WishView>(selector?: (s: WishView) => T): T {
   const { storeId } = useCurrentStore();
   const sid = storeId ?? "__unknown__";
-  return useRaw((state) => {
-    const ids = state.items.filter((e) => e.storeId === sid).map((e) => e.productId);
-    const view: WishView = {
-      ids,
-      toggle: (id) => state._toggle(sid, id),
-      has: (id) => ids.includes(id),
-    };
-    return (selector ? selector(view) : (view as unknown as T)) as T;
-  });
+  const entries = useRaw((state) => state.items);
+  const toggleRaw = useRaw((state) => state._toggle);
+
+  const ids = useMemo(() => entries.filter((e) => e.storeId === sid).map((e) => e.productId), [entries, sid]);
+  const toggle = useCallback((id: string) => toggleRaw(sid, id), [toggleRaw, sid]);
+  const has = useCallback((id: string) => ids.includes(id), [ids]);
+  const view = useMemo<WishView>(() => ({ ids, toggle, has }), [ids, toggle, has]);
+
+  return (selector ? selector(view) : (view as unknown as T)) as T;
 }

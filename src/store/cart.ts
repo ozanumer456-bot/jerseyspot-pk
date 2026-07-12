@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useCallback, useMemo } from "react";
 import { useCurrentStore } from "@/lib/store-context";
 
 export type CartItem = {
@@ -58,17 +59,18 @@ export type CartView = {
 export function useCart<T = CartView>(selector?: (s: CartView) => T): T {
   const { storeId } = useCurrentStore();
   const sid = storeId ?? "__unknown__";
-  return useCartRaw((state) => {
-    const items = state.items.filter((i) => i.storeId === sid);
-    const view: CartView = {
-      items,
-      add: (item) => state._add({ ...item, storeId: sid }),
-      remove: state._remove,
-      updateQty: state._updateQty,
-      clear: () => state._clearStore(sid),
-      subtotal: () => items.reduce((s, i) => s + i.price * i.quantity, 0),
-      count: () => items.reduce((s, i) => s + i.quantity, 0),
-    };
-    return (selector ? selector(view) : (view as unknown as T)) as T;
-  });
+  const rawItems = useCartRaw((state) => state.items);
+  const addRaw = useCartRaw((state) => state._add);
+  const remove = useCartRaw((state) => state._remove);
+  const updateQty = useCartRaw((state) => state._updateQty);
+  const clearRaw = useCartRaw((state) => state._clearStore);
+
+  const items = useMemo(() => rawItems.filter((i) => i.storeId === sid), [rawItems, sid]);
+  const add = useCallback<CartView["add"]>((item) => addRaw({ ...item, storeId: sid }), [addRaw, sid]);
+  const clear = useCallback(() => clearRaw(sid), [clearRaw, sid]);
+  const subtotal = useCallback(() => items.reduce((s, i) => s + i.price * i.quantity, 0), [items]);
+  const count = useCallback(() => items.reduce((s, i) => s + i.quantity, 0), [items]);
+  const view = useMemo<CartView>(() => ({ items, add, remove, updateQty, clear, subtotal, count }), [items, add, remove, updateQty, clear, subtotal, count]);
+
+  return (selector ? selector(view) : (view as unknown as T)) as T;
 }
