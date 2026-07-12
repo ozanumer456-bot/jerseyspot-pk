@@ -8,6 +8,7 @@ import {
 import { type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { Branding } from "@/components/Branding";
+import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import { StoreProvider } from "@/lib/store-context";
 
 
@@ -61,9 +62,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <StoreProvider>
-        <Branding />
-        <Outlet />
-        <Toaster theme="dark" position="top-right" />
+        <AppErrorBoundary>
+          <Branding />
+          <Outlet />
+          <Toaster theme="dark" position="top-right" />
+        </AppErrorBoundary>
       </StoreProvider>
     </QueryClientProvider>
 
