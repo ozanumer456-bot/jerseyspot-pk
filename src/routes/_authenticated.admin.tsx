@@ -635,7 +635,7 @@ function SettingsTab() {
   const [form, setForm] = useState<Stg>(settings);
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { setForm(settings); }, [settings]);
+  useEffect(() => { setForm(settings); }, [settings.id, settings.store_slug]);
 
   const save = async () => {
     setBusy(true);
